@@ -3,44 +3,764 @@ var com = com || {};
 $( document ).ready(function() { 
    com.fc = com.fc || {}; 
    com.fc.JavaScriptDistLib = {
-  getProperty: function (a,b){try{var c=$('[obj-name= "'+a+'"]'),d=null;switch(b){case"width":d=c.width();break;case"height":d=c.height();break;case"x":d=Math.round(parseFloat(c.css("transform").split(",")[4]));break;case"y":d=Math.round(parseFloat(c.css("transform").split(",")[5]));break;case"Alpha":d=c.css("opacity");break;case"Background color":d=c.css("background-color");break;case"Horizontal scroll":d=c.css("overflow-x");break;case"Vertical scroll":d=c.css("overflow-y")}return d}catch(a){throw a}},
-  setProperty: function (a,b,c){try{var d=$('[obj-name= "'+a+'"]');switch(b){case"width":d.css("width",c+"px");break;case"height":d.css("height",c+"px");break;case"x":var e=Math.round(parseFloat(d.css("transform").split(",")[5]));d.css("transform","translate("+c+"px,"+e+"px)");break;case"y":var f=Math.round(parseFloat(d.css("transform").split(",")[4]));d.css("transform","translate("+f+"px,"+c+"px)");break;case"Alpha":d.css("opacity",c/100);break;case"Background color":d.css("background-color",c);break;case"Horizontal scroll":var g=d.css("overflow-x","hidden");c&&(g=d.css("overflow-x","scroll"));break;case"Vertical scroll":var g=d.css("overflow-y","hidden");c&&(g=d.css("overflow-y","scroll"))}}catch(a){throw a}},
-  removeGesture: function (a,b){try{var c=$('[obj-name= "'+a+'"]');switch(b){case"CLICK":return c.unbind("click")}}catch(a){throw a}},
-  actionHide: function (a){var b=a.getFieldValue("OBJECT"),c='[obj-name="'+b+'"]',d="  $('"+c+"').hide();";return d},
-  actionShow: function (a){var b=a.getFieldValue("OBJECT"),c='[obj-name="'+b+'"]',d="  $('"+c+"').show();";return d},
-  sensorIsVisible: function (a){var b=a.getFieldValue("OBJECT"),c='[obj-name="'+b+'"]',d="  $('"+c+"').is(':visible')";return[d,Blockly.JavaScript.ORDER_NONE]},
-  _handleException: function (a,b){console.error("Exception: ",a,b)},
+  getProperty: function (objName, property) {
+        try {
+            var elem = $('[obj-name= "' + objName + '"]');
+            var value = null;
+            switch (property) {
+                case "width":
+                    value = elem.width();
+                    break;
+                case "height":
+                    value = elem.height();
+                    break;
+                case "x":
+                    value = Math.round(parseFloat(elem.css('transform').split(',')[4]));
+                    //value = elem.position().left;
+                    break;
+                case "y":
+                    //value = elem.position().top;
+                    value = Math.round(parseFloat(elem.css('transform').split(',')[5]));
+                    break;
+                case "Alpha":
+                    value = elem.css('opacity');
+                    break;
+                case "Background color":
+                    value = elem.css('background-color');
+                    break;
+                case "Horizontal scroll":
+                    value = elem.css('overflow-x');
+                    break;
+                case "Vertical scroll":
+                    value = elem.css('overflow-y');
+                    break;
+            }
+            return value;
+        } catch (e) {
+            throw (e);
+        }
+    },
+  setProperty: function (objName, property, value) {
+        try {
+            var elem = $('[obj-name= "' + objName + '"]');
+            switch (property) {
+                case "width":
+                    elem.css('width', value + 'px');
+                    break;
+                case "height":
+                    elem.css('height', value + 'px');
+                    break;
+                case "x":
+                    //var yPos = Math.round(elem.position().top);
+                    var yPos = Math.round(parseFloat(elem.css('transform').split(',')[5]));
+                    elem.css('transform','translate('+value+'px,'+yPos+'px)');
+                    break;
+                case "y":
+                    //var xPos = Math.round(elem.position().left);
+                    var xPos = Math.round(parseFloat(elem.css('transform').split(',')[4]));
+                    elem.css('transform','translate('+xPos+'px,'+value+'px)');
+                    break;
+                case "Alpha":
+                    elem.css('opacity', value/100 );
+                    break;
+                case "Background color":
+                    elem.css('background-color', value);
+                    break;
+
+                case "Horizontal scroll":
+                    var code = elem.css('overflow-x', 'hidden');
+                    if (value) {
+                        code = elem.css('overflow-x', 'scroll');
+                    }
+                    break;
+                case "Vertical scroll":
+                    var code = elem.css('overflow-y', 'hidden');
+                    if (value) {
+                        code = elem.css('overflow-y', 'scroll');
+                    }
+                    break;
+            }
+        } catch (e) {
+            throw (e);
+        }
+    },
+  removeGesture: function (objName, gesture) {
+        try {
+            var elem = $('[obj-name= "' + objName + '"]');
+            switch (gesture) {
+                case "CLICK":
+                    return elem.unbind('click');
+                    break;
+            }
+        } catch (e) {
+            throw(e);
+        }
+    },
+  actionHide: function (block) {
+        var object_name = block.getFieldValue('OBJECT');
+        var elemSelector = '[obj-name="' + object_name + '"]';
+        var code = "  $('"+elemSelector+ "').hide();";
+        return code;
+    },
+  actionShow: function (block) {
+        var object_name = block.getFieldValue('OBJECT');
+        var elemSelector = '[obj-name="' + object_name + '"]';
+        var code = "  $('"+elemSelector+ "').show();";
+        return code;
+    },
+  sensorIsVisible: function (block) {
+        var object_name = block.getFieldValue('OBJECT');
+        var elemSelector = '[obj-name="' + object_name + '"]';
+        var code = "  $('"+elemSelector+ "').is(':visible')";
+        return [code, Blockly.JavaScript.ORDER_NONE];
+    },
+  _handleException: function (e, message) {
+        console.error('Exception: ', e, message);
+    },
   distMode: "deploy",
   Image: {
-    createImageFromUrl: function (a,b){b(a)},
-    setProperty: function (a,b,c){try{var d='[obj-name="'+a+'"]',e=$(d);switch(console.log(c),b){case"Image":e.find("img").attr("src",c);break;case"width":case"height":case"Alpha":case"Background color":case"x":case"y":com.fc.JavaScriptDistLib.setProperty(a,b,c);break;case"Scaling":switch(c){case"stretch":$(d+" img").css("width","inherit"),$(d+" img").css("height","inherit"),$(d+" img").attr("scale-type","stretch");break;case"fit":$(d+" img").css("width","inherit"),$(d+" img").css("height","initial"),$(d+" img").attr("scale-type","fit");break;case"crop":$(d+" img").css("width","initial"),$(d+" img").css("height","initial"),$(d+" img").attr("scale-type","crop")}}}catch(a){throw new com.fc.JavaScriptDistLib.Image.ImageException(a)}},
-    getProperty: function (a,b){try{var c,d='[obj-name= "'+a+'"]',e=$(d);switch(b){case"Image":c=e.attr("src");break;case"width":case"height":case"x":case"y":case"Alpha":case"Background color":c=com.fc.JavaScriptDistLib.getProperty(a,b);break;case"Scaling":c=e.attr("scale-type")}return c}catch(a){throw new com.fc.JavaScriptDistLib.Image.ImageException(a)}},
-    ImageException: function (a,b){this.name="ImageException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
+    createImageFromUrl: function (url,successCallBack) {
+    successCallBack (url);
+  },
+    setProperty: function (objName, property, value) {
+    try {
+      var elemSelector = '[obj-name="' + objName + '"]';
+      var elem = $(elemSelector);
+      console.log (value);
+      switch (property) {
+        case "Image":
+          elem.find('img').attr('src',value);
+          break;
+        case "width":
+        case "height":
+        case "Alpha":
+        case "Background color":
+        case "x":
+        case "y":
+          com.fc.JavaScriptDistLib.setProperty(objName, property, value);
+        break;
+        case "Scaling":
+          switch (value) {
+            case "stretch":
+              $(elemSelector + ' img').css('width','inherit');
+              $(elemSelector + ' img').css('height','inherit');
+              $(elemSelector + ' img').attr('scale-type','stretch');
+              break;
+            case "fit":
+              $(elemSelector + ' img').css('width','inherit');
+              $(elemSelector + ' img').css('height','initial');
+              $(elemSelector + ' img').attr('scale-type','fit');
+              break;
+            case "crop":
+              $(elemSelector + ' img').css('width','initial');
+              $(elemSelector + ' img').css('height','initial');
+              $(elemSelector + ' img').attr('scale-type','crop');
+              break;
+          }
+        break;
+      }
+    } catch (e) {
+      throw new com.fc.JavaScriptDistLib.Image.ImageException(e);
+    }
+  },
+    getProperty: function (objName, property) {
+    try {
+      var elemSelector = '[obj-name= "' + objName + '"]';
+      var elem = $(elemSelector);
+      var value;
+      switch (property) {
+        case "Image":
+          value = elem.attr('src');
+          break;
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+        case "Alpha":
+        case "Background color":
+          value = com.fc.JavaScriptDistLib.getProperty( objName, property);
+          break;
+        case "Scaling":
+          value = elem.attr('scale-type');
+          break;
+      }
+      return value;
+    } catch (e) {
+      throw new com.fc.JavaScriptDistLib.Image.ImageException(e);
+    }
+  },
+    ImageException: function (snappMessage, msg) {
+    this.name = "ImageException";
+    this.snappMessage = snappMessage;
+    //custom message from snapp.
+    this.message = msg || snappMessage;
+    this.stack = (new Error()).stack;
+  },
     },
   Label: {
-    getProperty: function (a,b){try{var c,d='[obj-name= "'+a+'"]';$(d);switch(b){case"width":case"height":case"x":case"y":c=com.fc.JavaScriptDistLib.getProperty(a,b);break;case"Text":c=$(d+" .label").html();break;case"Font size":c=$(d+" .label").css("font-size");break;case"Alpha":c=100*$(d+" .label").css("opacity");break;case"Text Alignment":c=$(d+" .label").css("text-align");break;case"Vertical Alignment":c=$(d+" .label").css("vertical-align");break;case"Font style":c=$(d+" .label").css("font-style");break;case"Font family":c=$(d+" .label").css("font-family");break;case"Background color":c=$(d+" .label").css("background-color");break;case"Text color":c=$(d+" .label").css("color");break;case"Max lines":c=$(d+" .label").css("-webkit-line-clamp")}return c}catch(a){throw a}},
-    setProperty: function (a,b,c){try{var d='[obj-name= "'+a+'"]';$(d);switch(b){case"width":case"height":case"x":case"y":com.fc.JavaScriptDistLib.setProperty(a,b,c);break;case"Text":$(d+" .label").html(c);break;case"Font size":$(d+" .label").css("font-size",c+"px");break;case"Alpha":$(d+" .label").css("opacity",c/100);break;case"Text Alignment":$(d+" .label").css("text-align",c.toLowerCase());break;case"Vertical Alignment":$(d+" .label").css("vertical-align",c.toLowerCase());break;case"Font style":$(d+" .label").css("font-style",c.toLowerCase());break;case"Font family":$(d+" .label").css("font-family",c.toLowerCase());break;case"Background color":$(d+" .label").css("background-color",c);break;case"Text color":$(d+" .label").css("color",c);break;case"Max lines":var e=$(d).css("line-height").replace("px",""),f=e*val;$(d+" div.label").css({overflow:"hidden","text-overflow":"ellipsis",display:"-webkit-box","-webkit-line-clamp":val.toString(),"-webkit-box-orient":"vertical","max-height":f+"px"})}}catch(a){throw a}},
+    getProperty: function ( objName, property) {
+    try {
+      var elemSelector = '[obj-name= "' + objName + '"]';
+      var elem = $(elemSelector);
+      var value;
+      switch (property) {
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+          value  = com.fc.JavaScriptDistLib.getProperty( objName, property);
+          break;
+        case "Text":
+          value  = $(elemSelector + ' .label').html();
+          break;
+        case "Font size":
+          value = $(elemSelector + ' .label').css('font-size');
+          break;
+        case "Alpha":
+          value = $(elemSelector + ' .label').css('opacity') * 100;
+          break;
+        case "Text Alignment":
+          value = $(elemSelector + ' .label').css('text-align');
+          break;
+        case "Vertical Alignment":
+          value = $(elemSelector + ' .label').css('vertical-align');
+          break;
+        case "Font style":
+          value = $(elemSelector + ' .label').css('font-style');
+          break;
+        case "Font family":
+          value = $(elemSelector + ' .label').css('font-family');
+          break;
+        case "Background color":
+          value = $(elemSelector + ' .label').css('background-color');
+          break;
+        case "Text color":
+          value = $(elemSelector + ' .label').css('color');
+          break;
+        case "Max lines":
+          value = $(elemSelector + ' .label').css('-webkit-line-clamp');
+          break;
+      }
+      return value;
+    } catch (e) {
+      throw (e);
+    }
+  },
+    setProperty: function (objName, property ,value) {
+    try {
+      var elemSelector = '[obj-name= "' + objName + '"]';
+      var elem = $(elemSelector);
+      switch (property) {
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+          com.fc.JavaScriptDistLib.setProperty( objName, property, value);
+          break;
+        case "Text":
+          $(elemSelector + ' .label').html(value);
+          break;
+        case "Font size":
+          $(elemSelector + ' .label').css('font-size',value+'px');
+          break;
+        case "Alpha":
+          $(elemSelector + ' .label').css('opacity',value/100);
+          break;
+        case "Text Alignment":
+          $(elemSelector + ' .label').css('text-align',value.toLowerCase());
+          break;
+        case "Vertical Alignment":
+          $(elemSelector + ' .label').css('vertical-align',value.toLowerCase());
+          break;
+        case "Font style":
+          $(elemSelector + ' .label').css('font-style',value.toLowerCase());
+          break;
+        case "Font family":
+          $(elemSelector + ' .label').css('font-family',value.toLowerCase());
+          break;
+        case "Background color":
+          $(elemSelector + ' .label').css('background-color',value);
+          break;
+        case "Text color":
+          $(elemSelector + ' .label').css('color',value);
+          break;
+        case "Max lines":
+          //code = setLabelMaxLines(id,value);
+          var lineHeight = $(elemSelector).css('line-height').replace('px','');
+          var maxheight = lineHeight * val;
+          $(elemSelector + ' div.label').css({
+            'overflow': 'hidden',
+            'text-overflow': 'ellipsis',
+            'display': '-webkit-box',
+            '-webkit-line-clamp': val.toString(),
+            '-webkit-box-orient': 'vertical',
+            'max-height': maxheight +'px'
+          });
+          break;
+      }
+    } catch (e) {
+      throw (e);
+    }
+  },
     },
   Button: {
-    setProperty: function (a,b,c){try{var d='[obj-name="'+a+'"]';$(d);switch(b){case"width":case"height":case"x":case"y":com.fc.JavaScriptDistLib.setProperty(a,b,c);break;case"Alpha":$(d+" button").css("opacity",c/100);break;case"Background color":$(d+" button").css("background-color",c);break;case"Text":$(d+" button").html(c);break;case"Font size":$(d+" button").css("font-size",c+"px");break;case"Text Alignment":$(d+" button").css("text-align",c.toLowerCase());break;case"Vertical Alignment":$(d+" button").css("vertical-align",c.toLowerCase());break;case"Font style":$(d+" button").css("font-style",c.toLowerCase());break;case"Font family":$(d+" button").css("font-family",c);break;case"Text color":$(d+" button").css("color",c)}}catch(a){throw new ImageException(a)}},
-    getProperty: function (a,b){try{var c,d='[obj-name= "'+a+'"]';$(d);switch(b){case"width":case"height":case"x":case"y":c=com.fc.JavaScriptDistLib.getProperty(a,b);break;case"Text":c=$(d+" button").html(),console.log(c);break;case"Font size":c=$(d+" button").css("font-size");break;case"Alpha":c=100*$(d+" button").css("opacity");break;case"Text Alignment":c=$(d+" button").css("text-align");break;case"Vertical Alignment":c=$(d+" button").css("vertical-align");break;case"Font style":c=$(d+" button").css("font-style");break;case"Font family":c=$(d+" button").css("font-family");break;case"Background color":c=$(d+" button").css("background-color");break;case"Text color":c=$(d+" button").css("color")}return c}catch(a){throw a}},
+    setProperty: function (objName, property, value) {
+    try {
+      var elemSelector = '[obj-name="' + objName + '"]';
+      var elem = $(elemSelector);
+
+      switch (property) {
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+          com.fc.JavaScriptDistLib.setProperty(objName, property, value);
+          break;
+        case "Alpha":
+          $(elemSelector + ' button').css('opacity', value/100);
+          break;
+        case "Background color":
+          $(elemSelector + ' button').css('background-color', value);
+          break;
+        case "Text":
+          $(elemSelector + ' button').html(value);
+          break;
+        case "Font size":
+          $(elemSelector + ' button').css('font-size',value+'px');
+          break;
+        case "Text Alignment":
+          $(elemSelector + ' button').css('text-align',value.toLowerCase());
+          break;
+        case "Vertical Alignment":
+          $(elemSelector + ' button').css('vertical-align',value.toLowerCase());
+          break;
+        case "Font style":
+          $(elemSelector + ' button').css('font-style',value.toLowerCase());
+          break;
+        case "Font family":
+          $(elemSelector + ' button').css('font-family',value);
+          break;
+        case "Text color":
+          $(elemSelector + ' button').css('color',value);
+          break;
+      }
+    } catch (e) {
+      throw new ImageException(e);
+    }
+  },
+    getProperty: function ( objName, property) {
+    try {
+      var elemSelector = '[obj-name= "' + objName + '"]';
+      var elem = $(elemSelector);
+      var value;
+      switch (property) {
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+          value  = com.fc.JavaScriptDistLib.getProperty( objName, property);
+          break;
+        case "Text":
+          value  = $(elemSelector + ' button').html();
+          console.log (value);
+          break;
+        case "Font size":
+          value  = $(elemSelector + ' button').css('font-size');
+          break;
+        case "Alpha":
+          value  = $(elemSelector + ' button').css('opacity') * 100;
+          break;
+        case "Text Alignment":
+          value = $(elemSelector + ' button').css('text-align');
+          break;
+        case "Vertical Alignment":
+          value = $(elemSelector + ' button').css('vertical-align');
+          break;
+        case "Font style":
+          value = $(elemSelector + ' button').css('font-style');
+          break;
+        case "Font family":
+          value = $(elemSelector + ' button').css('font-family');
+          break;
+        case "Background color":
+          value = $(elemSelector + ' button').css('background-color');
+          break;
+        case "Text color":
+          value = $(elemSelector + ' button').css('color');
+          break;
+      }
+      return value;
+    } catch (e) {
+      throw (e);
+    }
+  },
     },
   GraphContainer: {
-    setProperty: function (a,b,c){try{var d,e='[obj-name="'+a+'"]';$(e);switch($(e).find(".c3").each(function(){d=$(this).data("c3-chart")}),b){case"width":case"height":case"x":case"y":com.fc.JavaScriptDistLib.setProperty(a,b,c);break;case"Type":d.transform(c);break;case"BG Color":$(e).find("#fcLine").css("background-color",c);break;case"Legends":var f="visible";c||(f="hidden"),d3.select(e).selectAll("g.c3-legend-item").style("visibility",f);break;case"Grid":var f="visible";c||(f="hidden"),d3.select(e).selectAll("g.c3-grid").style("visibility",f);break;case"X Axis Color":d3.select(e).selectAll("g.c3-axis-x").selectAll("path").style("stroke",c);break;case"Y Axis Color":d3.select(e).selectAll("g.c3-axis-y").selectAll("path").style("stroke",c);break;case"X Axis Text Color":d3.select(e).selectAll("g.c3-axis-x").selectAll("text").selectAll("tspan").style("fill",c);break;case"Y Axis Text Color":d3.select(e).selectAll("g.c3-axis-y").selectAll("text").selectAll("tspan").style("fill",c);break;case"X Axis Line Width":d3.select(e).selectAll("g.c3-axis-x").selectAll("path").style("stroke-width",c);break;case"Y Axis Line Width":d3.select(e).selectAll("g.c3-axis-y").selectAll("path").style("stroke-width",c);break;case"Legend Text":d3.select(e).selectAll("text.c3-axis-x-label").style("stroke",c),d3.select(e).selectAll("text.c3-axis-y-label").style("stroke",c),d3.select(e).selectAll("g.c3-legend-item").selectAll("text").style("stroke",val);break;case"Fill Alpha":d3.select(e).selectAll(".c3-area ").style("opacity",c/100),d3.select(e).selectAll("g.c3-chart-bars ").selectAll("path").style("opacity",c/100);break;case"Line Width":d3.select(e).selectAll("g.c3-chart-lines").selectAll("path").style("stroke-width",c);break;case"Line Circle Color":d3.select(e).selectAll("circle").style("stroke",c),d3.select(e).selectAll("circle").style("fill",c);break;case"Circle Radius":d3.select(e).selectAll("circle").attr("r",c);break;case"X Axis Text":d.axis.labels({x:c});break;case"Y Axis Text":d.axis.labels({y:c});break;case"Fill Color":d3.select(e).selectAll(".c3-area ").style("fill",c);break;case"Bar Color":d3.select(e).selectAll("g.c3-chart-bar").selectAll("path").style("fill",c);break;case"Draw Line Values":var f="visible";c||(f="hidden"),d3.select(e).selectAll("g.c3-chart-text").selectAll("text").style("visibility",f);break;case"Axis Font Size":d3.select(e).selectAll("g.c3-axis-x").selectAll("text").selectAll("tspan").style("font-size",c),d3.select(e).selectAll("g.c3-axis-y").selectAll("text").selectAll("tspan").style("font-size",c),d3.select(e).selectAll("text.c3-text").style("font-size",c);break;case"Line Filled":c?d.transform("area"):d.transform("line");break;case"Smooth Line":c?d.transform("area-spline"):d.transform("area")}}catch(a){throw new GraphException(a)}},
-    getProperty: function (a,b){try{var c,d,e='[obj-name= "'+a+'"]';$(e);switch($(e).find(".c3").each(function(){d=$(this).data("c3-chart")}),b){case"width":case"height":case"x":case"y":c=com.fc.JavaScriptDistLib.getProperty(a,b);break;case"Type":c=d.type;break;case"BG Color":c=$(e).find("#fcLine").css("background-color");break;case"Legends":c=d3.select(e).selectAll("g.c3-legend-item").style("visibility");break;case"Grid":c=d3.select(e).selectAll("g.c3-grid").style("visibility");break;case"X Axis Color":c=d3.select(e).selectAll("g.c3-axis-x").selectAll("path").style("stroke");break;case"Y Axis Color":c=d3.select(e).selectAll("g.c3-axis-y").selectAll("path").style("stroke");break;case"X Axis Text Color":c=d3.select(e).selectAll("g.c3-axis-x").selectAll("text").selectAll("tspan").style("fill");break;case"Y Axis Text Color":c=d3.select(e).selectAll("g.c3-axis-y").selectAll("text").selectAll("tspan").style("fill");break;case"X Axis Line Width":c=d3.select(e).selectAll("g.c3-axis-x").selectAll("path").style("stroke-width");break;case"Y Axis Line Width":c=d3.select(e).selectAll("g.c3-axis-y").selectAll("path").style("stroke-width");break;case"Legend Text":c=d3.select(e).selectAll("text.c3-axis-x-label").style("stroke");break;case"Fill Alpha":c=100*d3.select(e).selectAll(".c3-area ").style("opacity");break;case"Line Width":c=d3.select(e).selectAll("g.c3-axis-x").selectAll("path").style("stroke-width");break;case"Line Circle Color":c=d3.select(e).selectAll("circle").style("stroke");break;case"Circle Radius":c=d3.select(e).selectAll("circle").attr("r");break;case"X Axis Text":c=d3.select(e).selectAll("g.c3-axis-x").selectAll("text").html();break;case"Y Axis Text":c=d3.select(e).selectAll("g.c3-axis-y").selectAll("text").html();break;case"Fill Color":c=d3.select(e).selectAll(".c3-area ").style("fill");break;case"Bar Color":c=d3.select(e).selectAll("g.c3-chart-bar").selectAll("path").style("fill");break;case"Draw Line Values":c=d3.select(e).selectAll("g.c3-chart-text").style("opacity");break;case"Axis Font Size":c=d3.select(e).selectAll("g.c3-axis-x").selectAll("text").selectAll("tspan").style("font-size")}return c}catch(a){throw new GraphException(a)}},
-    createChartWithList: function (a,b,c,d){var f,g='[obj-name= "'+a+'"]';$(g);$(g).find(".c3").each(function(){f=$(this).data("c3-chart")});var h=[],i=[];if(h.push("x"),null!=c){var j=!1;if(null!=b)for(var k=0;k<b.length;k++)h.push(b[k]);else j=!0;i.push(d);for(var l=0;l<c.length;l++)i.push(c[l]),j&&h.push(l);var m={};m.columns=[],m.columns.push(h),m.columns.push(i),m.unload=!0;var n=f.load(m);return n}throw new GraphException(e)},
-    addChartTransition: function (a,b,c){var d,e='[obj-name= "'+a+'"]';$(e);$(e).find(".c3").each(function(){d=$(this).data("c3-chart")});for(var f=[d.data()[0].id],g=[d.data()[0].id],h=0;h<d.data()[0].values.length;h++)g.push(0);for(var h=0;h<d.data()[0].values.length;h++)f.push(d.data()[0].values[h].value);var i=d.load({columns:[g]}),j=setTimeout(function(){d.load({columns:[f]})},b);return[i,j]},
-    addValuesToChart: function (a,b,c){var d,e='[obj-name= "'+a+'"]';$(e);$(e).find(".c3").each(function(){d=$(this).data("c3-chart")});var f={x:parseInt(b),index:d.data()[0].values.length+1,id:d.data()[0].id,value:c},g=d.data()[0].values;g.push(f);for(var h=["x"],i=[d.data()[0].id],j=0;j<g.length;j++)h.push(g[j].x),i.push(g[j].value);return d.load({columns:[h,i]})},
-    GraphException: function (a,b){this.name="GraphException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
+    setProperty: function (objName, property, value) {
+    try {
+      var elemSelector = '[obj-name="' + objName + '"]';
+      var elem = $(elemSelector);
+
+      var graph;
+      $(elemSelector).find('.c3').each(function() {
+        graph = $(this).data('c3-chart'); 
+      });
+      switch (property) {
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+          com.fc.JavaScriptDistLib.setProperty(objName, property, value);
+        break;
+        case "Type":
+          graph.transform(value);
+        break;
+        case "BG Color":
+          $(elemSelector).find('#fcLine').css('background-color',value);
+        break;
+        case "Legends":
+          var show = 'visible';
+          if (!value) {
+            show = 'hidden';
+          }
+          // var xAxisLabel = d3.select(id).selectAll('text.c3-axis-x-label').style("visibility", show);
+          // var yAxisLabel = d3.select(id).selectAll('text.c3-axis-y-label').style("visibility", show);
+          d3.select(elemSelector).selectAll('g.c3-legend-item').style("visibility", show);
+        break;
+        case "Grid":
+          var show = 'visible';
+          if (!value) {
+            show = 'hidden';
+          }
+          d3.select(elemSelector).selectAll('g.c3-grid').style('visibility',show);
+        break;
+        case "X Axis Color":
+          d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('path').style("stroke", value);
+        break;
+        case "Y Axis Color":
+          d3.select(elemSelector).selectAll('g.c3-axis-y').selectAll('path').style("stroke", value);
+        break;
+        case "X Axis Text Color":
+          d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('text').selectAll('tspan').style("fill", value);
+        break;
+        case "Y Axis Text Color":
+          d3.select(elemSelector).selectAll('g.c3-axis-y').selectAll('text').selectAll('tspan').style("fill", value);
+        break;
+        case "X Axis Line Width":
+          d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('path').style("stroke-width", value);
+        break;
+        case "Y Axis Line Width":
+          d3.select(elemSelector).selectAll('g.c3-axis-y').selectAll('path').style("stroke-width", value);
+        break;
+        case "Legend Text":
+          d3.select(elemSelector).selectAll('text.c3-axis-x-label').style("stroke", value);
+          d3.select(elemSelector).selectAll('text.c3-axis-y-label').style("stroke", value);
+          d3.select(elemSelector).selectAll('g.c3-legend-item').selectAll('text').style("stroke", val);
+        break;
+        case "Fill Alpha":
+          d3.select(elemSelector).selectAll('.c3-area ').style('opacity',value/100);
+          d3.select(elemSelector).selectAll('g.c3-chart-bars ').selectAll('path').style('opacity',value/100);
+        break;
+        case "Line Width":
+          d3.select(elemSelector).selectAll('g.c3-chart-lines').selectAll('path').style("stroke-width", value);
+        break;
+        case "Line Circle Color":
+          d3.select(elemSelector).selectAll('circle').style("stroke", value);
+          d3.select(elemSelector).selectAll('circle').style("fill", value);
+        break;
+        case "Circle Radius":
+          d3.select(elemSelector).selectAll('circle').attr('r',value);
+        break;
+        case "X Axis Text":
+          graph.axis.labels({x: value});
+        break;
+        case "Y Axis Text":
+          graph.axis.labels({y: value});
+        break;
+        case "Fill Color":
+          d3.select(elemSelector).selectAll('.c3-area ').style('fill',value);
+        break;
+        case "Bar Color":
+          d3.select(elemSelector).selectAll('g.c3-chart-bar').selectAll('path').style('fill',value)
+        break;
+        case "Draw Line Values":
+          var show = 'visible';
+          if (!value) {
+            show = 'hidden';
+          }
+          d3.select(elemSelector).selectAll('g.c3-chart-text').selectAll('text').style("visibility", show);
+        break;
+        case "Axis Font Size":
+          d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('text').selectAll('tspan').style('font-size',value);
+          d3.select(elemSelector).selectAll('g.c3-axis-y').selectAll('text').selectAll('tspan').style('font-size',value);
+          d3.select(elemSelector).selectAll('text.c3-text').style('font-size',value);
+        break;
+        case "Line Filled":
+          if (value) {
+            graph.transform('area');
+          } else {
+            graph.transform('line');
+          }
+        break;
+        case "Smooth Line":
+          if (value) {
+            graph.transform('area-spline');
+          } else {
+            graph.transform('area');
+          }
+        break;
+      }
+    } catch (e) {
+      throw new GraphException(e);
+    }
+  },
+    getProperty: function ( objName, property) {
+    try {
+      var elemSelector = '[obj-name= "' + objName + '"]';
+      var elem = $(elemSelector);
+      var value;
+      var graph;
+      $(elemSelector).find('.c3').each(function() {
+        graph = $(this).data('c3-chart'); 
+      });
+      switch (property) {
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+          value  = com.fc.JavaScriptDistLib.getProperty( objName, property);
+        break;
+        case "Type":
+          value = graph.type;
+        break;
+        case "BG Color":
+          value = $(elemSelector).find('#fcLine').css('background-color');
+        break;
+        case "Legends":
+          value = d3.select(elemSelector).selectAll('g.c3-legend-item').style("visibility");
+        break;
+        case "Grid":
+          value = d3.select(elemSelector).selectAll('g.c3-grid').style('visibility');
+        break;
+        case "X Axis Color":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('path').style("stroke");
+        break;
+        case "Y Axis Color":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-y').selectAll('path').style("stroke");
+        break;
+        case "X Axis Text Color":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('text').selectAll('tspan').style("fill");
+        break;
+        case "Y Axis Text Color":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-y').selectAll('text').selectAll('tspan').style("fill");
+        break;
+        case "X Axis Line Width":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('path').style("stroke-width");
+        break;
+        case "Y Axis Line Width":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-y').selectAll('path').style("stroke-width");
+        break;
+        case "Legend Text":
+          value = d3.select(elemSelector).selectAll('text.c3-axis-x-label').style("stroke");
+        break;
+        case "Fill Alpha":
+          value = d3.select(elemSelector).selectAll('.c3-area ').style('opacity') * 100;
+        break;
+        case "Line Width":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('path').style("stroke-width");
+        break;
+        case "Line Circle Color":
+          value = d3.select(elemSelector).selectAll('circle').style("stroke");
+        break;
+        case "Circle Radius":
+          value = d3.select(elemSelector).selectAll('circle').attr('r');
+        break;
+        case "X Axis Text":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('text').html();
+        break;
+        case "Y Axis Text":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-y').selectAll('text').html();
+        break;
+        case "Fill Color":
+          value = d3.select(elemSelector).selectAll('.c3-area ').style('fill');
+        break;
+        case "Bar Color":
+          value = d3.select(elemSelector).selectAll('g.c3-chart-bar').selectAll('path').style('fill');
+        break;
+        case "Draw Line Values":
+          value = d3.select(elemSelector).selectAll('g.c3-chart-text').style("opacity");
+        break;
+        case "Axis Font Size":
+          value = d3.select(elemSelector).selectAll('g.c3-axis-x').selectAll('text').selectAll('tspan').style('font-size');
+        break;
+        
+      }
+      return value;
+    } catch (e) {
+      throw new GraphException(e);
+    }
+  },
+    createChartWithList: function (objName,xArr,yArr,name) {
+    var elemSelector = '[obj-name= "' + objName + '"]';
+    var elem = $(elemSelector);
+    var value;
+    var graph;
+    $(elemSelector).find('.c3').each(function() {
+      graph = $(this).data('c3-chart'); 
+    });
+    var xAxisData = [];
+    var yAxisData = [];
+    xAxisData.push('x');
+
+    if( yArr!=null ) {
+      var populateXAxis = false;
+     
+      if( xArr!=null ) {
+        for(var xIndex=0; xIndex<xArr.length; xIndex++) {
+          xAxisData.push(xArr[xIndex]);
+        }
+      }
+      else {
+        populateXAxis = true;
+      }
+      yAxisData.push(name);
+      for(var i=0; i<yArr.length; i++) {
+        yAxisData.push(yArr[i]);
+        if( populateXAxis ) {
+          xAxisData.push(i);
+        }
+      }
+      var chartData = {};
+      chartData.columns = [];
+      chartData.columns.push(xAxisData);
+      chartData.columns.push(yAxisData);
+      chartData.unload = true;
+
+      var updatedChart = graph.load(chartData);
+      return updatedChart;
+    } else {
+      throw new GraphException(e);
+    }
+  },
+    addChartTransition: function (objName,x,y) {
+    var elemSelector = '[obj-name= "' + objName + '"]';
+    var elem = $(elemSelector);
+    var value;
+    var graph;
+    $(elemSelector).find('.c3').each(function() {
+      graph = $(this).data('c3-chart'); 
+    });
+    var dataArr = [graph.data()[0].id];
+    var graphInitArr = [graph.data()[0].id];
+    for (var i=0;i<graph.data()[0].values.length;i++) {
+      graphInitArr.push(0); // ReInit the Graph
+    }
+    for (var i=0;i<graph.data()[0].values.length;i++) {
+      dataArr.push(graph.data()[0].values[i].value);
+    }
+    var initGraph = graph.load({
+      columns: [
+        graphInitArr,    
+      ]
+      
+    });
+    
+    var updatedGraph = setTimeout(function () {
+
+      graph.load({
+        columns: [
+          dataArr,    
+        ]
+      });
+    },x);
+    return [initGraph,updatedGraph];
+  },
+    addValuesToChart: function (objName,xVal,yVal) {
+    var elemSelector = '[obj-name= "' + objName + '"]';
+    var elem = $(elemSelector);
+    var value;
+    var graph;
+    $(elemSelector).find('.c3').each(function() {
+      graph = $(this).data('c3-chart'); 
+    });
+    var newVal = {
+      "x":parseInt(xVal),
+      "index":graph.data()[0].values.length+1,
+      "id":graph.data()[0].id,
+      "value":yVal
+    };
+    var appendedValues = graph.data()[0].values;
+    appendedValues.push(newVal);
+    var xArr = ['x'];
+    var dataArr = [graph.data()[0].id];
+    for (var i=0;i<appendedValues.length;i++) {
+      xArr.push(appendedValues[i].x)
+      dataArr.push(appendedValues[i].value);
+    }
+    return graph.load({
+      columns: [
+        xArr,
+        dataArr
+      ]
+    });
+  },
+    GraphException: function (snappMessage, msg) {
+    this.name = "GraphException";
+    this.snappMessage = snappMessage;
+    //custom message from snapp.
+    this.message = msg || snappMessage;
+    this.stack = (new Error()).stack;
+  },
     },
   Location: {
-    locationCreate: function (a,b){var c={lat:a,lng:b};return c},
-    locationGetLatitude: function (a){return a.lat},
-    locationGetLongitude: function (a){return a.lng},
-    createLocationFromText: function (a,b,c){console.log("createLocationFromText "+a);var d=a.split(",");if(2==d.length){console.log(d);var e=d[0],f=d[1],g={lat:e,lng:f};b(g)}else c("Invalid Location")},
+    locationCreate: function (lat,lng) {
+	  var locationObj = {lat: lat, lng: lng};
+	  return locationObj;
+	},
+    locationGetLatitude: function (loc) {
+		return loc.lat;
+	},
+    locationGetLongitude: function (loc) {
+		return loc.lng;
+	},
+    createLocationFromText: function (text, successCallback, errorCallback) {
+		console.log ("createLocationFromText " + text);
+		var locationArr = text.split(",");
+		if( locationArr.length == 2 ) {
+			console.log (locationArr);
+			var latitude = locationArr[0];
+			var longitude = locationArr[1];
+			var locationObj = {lat: latitude, lng: longitude};
+			successCallback (locationObj);
+		}
+		else {
+			errorCallback ("Invalid Location");
+		}
+	},
     },
   JSON: {
-    parseJSONDataForPath: function (a,b){var c={};if("string"==typeof a)try{c=JSON.parse(a)}catch(a){}else"object"==typeof a&&(c=a);var d=jsonPath(c,b);return d===!1?c={}:d},
+    parseJSONDataForPath: function (data, path) {
+    var jsonObject = {};
+    if( typeof(data) == 'string' ) {
+      try {
+        jsonObject = JSON.parse(data);
+      }
+      catch(e) {
+      }
+    }
+    else if( typeof(data) == 'object') {
+      jsonObject = data;
+    }
+    var jsonPathObject = jsonPath(jsonObject, path);
+    //=== is very important. Otherwise 0 will be treated as false as well.
+    if( jsonPathObject === false ) {
+      jsonObject = {};
+      return jsonObject;
+    }
+    else {
+      return jsonPathObject;
+    }
+  },
     },
   Connio: {
     connioBaseURL: "https://api.connio.com",
@@ -54,33 +774,215 @@ $( document ).ready(function() {
     connioMQTTPassword: "cddd9bed10324fcea3ccef36e37924fa",
     connioMQTTTopic: "connio/apps/_app_796713082971687907/devices/#",
     connioMQTTClient: {
-      _getHost: function (){return a},
-      _setHost: function (){throw new Error(p(n.UNSUPPORTED_OPERATION))},
-      _getPort: function (){return b},
-      _setPort: function (){throw new Error(p(n.UNSUPPORTED_OPERATION))},
-      _getPath: function (){return c},
-      _setPath: function (){throw new Error(p(n.UNSUPPORTED_OPERATION))},
-      _getURI: function (){return e},
-      _setURI: function (){throw new Error(p(n.UNSUPPORTED_OPERATION))},
-      _getClientId: function (){return k.clientId},
-      _setClientId: function (){throw new Error(p(n.UNSUPPORTED_OPERATION))},
-      _getOnConnectionLost: function (){return k.onConnectionLost},
-      _setOnConnectionLost: function (a){if("function"!=typeof a)throw new Error(p(n.INVALID_TYPE,[typeof a,"onConnectionLost"]));k.onConnectionLost=a},
-      _getOnMessageDelivered: function (){return k.onMessageDelivered},
-      _setOnMessageDelivered: function (a){if("function"!=typeof a)throw new Error(p(n.INVALID_TYPE,[typeof a,"onMessageDelivered"]));k.onMessageDelivered=a},
-      _getOnMessageArrived: function (){return k.onMessageArrived},
-      _setOnMessageArrived: function (a){if("function"!=typeof a)throw new Error(p(n.INVALID_TYPE,[typeof a,"onMessageArrived"]));k.onMessageArrived=a},
-      _getTrace: function (){return k.traceFunction},
-      _setTrace: function (a){if("function"!=typeof a)throw new Error(p(n.INVALID_TYPE,[typeof a,"onTrace"]));k.traceFunction=a},
-      connect: function (a){if(a=a||{},l(a,{timeout:"number",userName:"string",password:"string",willMessage:"object",keepAliveInterval:"number",cleanSession:"boolean",useSSL:"boolean",invocationContext:"object",onSuccess:"function",onFailure:"function",hosts:"object",ports:"object",mqttVersion:"number",mqttVersionExplicit:"boolean",uris:"object"}),void 0===a.keepAliveInterval&&(a.keepAliveInterval=60),a.mqttVersion>4||a.mqttVersion<3)throw new Error(p(n.INVALID_ARGUMENT,[a.mqttVersion,"connectOptions.mqttVersion"]));if(void 0===a.mqttVersion?(a.mqttVersionExplicit=!1,a.mqttVersion=4):a.mqttVersionExplicit=!0,void 0!==a.password&&void 0===a.userName)throw new Error(p(n.INVALID_ARGUMENT,[a.password,"connectOptions.password"]));if(a.willMessage){if(!(a.willMessage instanceof x))throw new Error(p(n.INVALID_TYPE,[a.willMessage,"connectOptions.willMessage"]));if(a.willMessage.stringPayload,"undefined"==typeof a.willMessage.destinationName)throw new Error(p(n.INVALID_TYPE,[typeof a.willMessage.destinationName,"connectOptions.willMessage.destinationName"]))}if("undefined"==typeof a.cleanSession&&(a.cleanSession=!0),a.hosts){if(!(a.hosts instanceof Array))throw new Error(p(n.INVALID_ARGUMENT,[a.hosts,"connectOptions.hosts"]));if(a.hosts.length<1)throw new Error(p(n.INVALID_ARGUMENT,[a.hosts,"connectOptions.hosts"]));for(var b=!1,d=0;d<a.hosts.length;d++){if("string"!=typeof a.hosts[d])throw new Error(p(n.INVALID_TYPE,[typeof a.hosts[d],"connectOptions.hosts["+d+"]"]));if(/^(wss?):\/\/((\[(.+)\])|([^\/]+?))(:(\d+))?(\/.*)$/.test(a.hosts[d])){if(0==d)b=!0;else if(!b)throw new Error(p(n.INVALID_ARGUMENT,[a.hosts[d],"connectOptions.hosts["+d+"]"]))}else if(b)throw new Error(p(n.INVALID_ARGUMENT,[a.hosts[d],"connectOptions.hosts["+d+"]"]))}if(b)a.uris=a.hosts;else{if(!a.ports)throw new Error(p(n.INVALID_ARGUMENT,[a.ports,"connectOptions.ports"]));if(!(a.ports instanceof Array))throw new Error(p(n.INVALID_ARGUMENT,[a.ports,"connectOptions.ports"]));if(a.hosts.length!=a.ports.length)throw new Error(p(n.INVALID_ARGUMENT,[a.ports,"connectOptions.ports"]));a.uris=[];for(var d=0;d<a.hosts.length;d++){if("number"!=typeof a.ports[d]||a.ports[d]<0)throw new Error(p(n.INVALID_TYPE,[typeof a.ports[d],"connectOptions.ports["+d+"]"]));var f=a.hosts[d],g=a.ports[d],h=f.indexOf(":")!=-1;e="ws://"+(h?"["+f+"]":f)+":"+g+c,a.uris.push(e)}}}k.connect(a)},
-      subscribe: function (a,b){if("string"!=typeof a)throw new Error("Invalid argument:"+a);if(b=b||{},l(b,{qos:"number",invocationContext:"object",onSuccess:"function",onFailure:"function",timeout:"number"}),b.timeout&&!b.onFailure)throw new Error("subscribeOptions.timeout specified with no onFailure callback.");if("undefined"!=typeof b.qos&&0!==b.qos&&1!==b.qos&&2!==b.qos)throw new Error(p(n.INVALID_ARGUMENT,[b.qos,"subscribeOptions.qos"]));k.subscribe(a,b)},
-      unsubscribe: function (a,b){if("string"!=typeof a)throw new Error("Invalid argument:"+a);if(b=b||{},l(b,{invocationContext:"object",onSuccess:"function",onFailure:"function",timeout:"number"}),b.timeout&&!b.onFailure)throw new Error("unsubscribeOptions.timeout specified with no onFailure callback.");k.unsubscribe(a,b)},
-      send: function (a,b,c,d){var e;if(0==arguments.length)throw new Error("Invalid argument.length");if(1==arguments.length){if(!(a instanceof x)&&"string"!=typeof a)throw new Error("Invalid argument:"+typeof a);if(e=a,"undefined"==typeof e.destinationName)throw new Error(p(n.INVALID_ARGUMENT,[e.destinationName,"Message.destinationName"]));k.send(e)}else e=new x(b),e.destinationName=a,arguments.length>=3&&(e.qos=c),arguments.length>=4&&(e.retained=d),k.send(e)},
-      disconnect: function (){k.disconnect()},
-      getTraceLog: function (){return k.getTraceLog()},
-      startTrace: function (){k.startTrace()},
-      stopTrace: function (){k.stopTrace()},
-      isConnected: function (){return k.connected},
+      _getHost: function () { return host; },
+      _setHost: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
+      _getPort: function () { return port; },
+      _setPort: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
+      _getPath: function () { return path; },
+      _setPath: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
+      _getURI: function () { return uri; },
+      _setURI: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
+      _getClientId: function () { return client.clientId; },
+      _setClientId: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
+      _getOnConnectionLost: function () { return client.onConnectionLost; },
+      _setOnConnectionLost: function (newOnConnectionLost) { 
+			if (typeof newOnConnectionLost === "function")
+				client.onConnectionLost = newOnConnectionLost;
+			else 
+				throw new Error(format(ERROR.INVALID_TYPE, [typeof newOnConnectionLost, "onConnectionLost"]));
+		},
+      _getOnMessageDelivered: function () { return client.onMessageDelivered; },
+      _setOnMessageDelivered: function (newOnMessageDelivered) { 
+			if (typeof newOnMessageDelivered === "function")
+				client.onMessageDelivered = newOnMessageDelivered;
+			else 
+				throw new Error(format(ERROR.INVALID_TYPE, [typeof newOnMessageDelivered, "onMessageDelivered"]));
+		},
+      _getOnMessageArrived: function () { return client.onMessageArrived; },
+      _setOnMessageArrived: function (newOnMessageArrived) { 
+			if (typeof newOnMessageArrived === "function")
+				client.onMessageArrived = newOnMessageArrived;
+			else 
+				throw new Error(format(ERROR.INVALID_TYPE, [typeof newOnMessageArrived, "onMessageArrived"]));
+		},
+      _getTrace: function () { return client.traceFunction; },
+      _setTrace: function (trace) {
+			if(typeof trace === "function"){
+				client.traceFunction = trace;
+			}else{
+				throw new Error(format(ERROR.INVALID_TYPE, [typeof trace, "onTrace"]));
+			}
+		},
+      connect: function (connectOptions) {
+			connectOptions = connectOptions || {} ;
+			validate(connectOptions,  {timeout:"number",
+									   userName:"string", 
+									   password:"string", 
+									   willMessage:"object", 
+									   keepAliveInterval:"number", 
+									   cleanSession:"boolean", 
+									   useSSL:"boolean",
+									   invocationContext:"object", 
+									   onSuccess:"function", 
+									   onFailure:"function",
+									   hosts:"object",
+									   ports:"object",
+									   mqttVersion:"number",
+									   mqttVersionExplicit:"boolean",
+									   uris: "object"});
+			
+			// If no keep alive interval is set, assume 60 seconds.
+			if (connectOptions.keepAliveInterval === undefined)
+				connectOptions.keepAliveInterval = 60;
+
+			if (connectOptions.mqttVersion > 4 || connectOptions.mqttVersion < 3) {
+				throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.mqttVersion, "connectOptions.mqttVersion"]));
+			}
+
+			if (connectOptions.mqttVersion === undefined) {
+				connectOptions.mqttVersionExplicit = false;
+				connectOptions.mqttVersion = 4;
+			} else {
+				connectOptions.mqttVersionExplicit = true;
+			}
+
+			//Check that if password is set, so is username
+			if (connectOptions.password !== undefined && connectOptions.userName === undefined)
+				throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.password, "connectOptions.password"]))
+
+			if (connectOptions.willMessage) {
+				if (!(connectOptions.willMessage instanceof Message))
+					throw new Error(format(ERROR.INVALID_TYPE, [connectOptions.willMessage, "connectOptions.willMessage"]));
+				// The will message must have a payload that can be represented as a string.
+				// Cause the willMessage to throw an exception if this is not the case.
+				connectOptions.willMessage.stringPayload;
+				
+				if (typeof connectOptions.willMessage.destinationName === "undefined")
+					throw new Error(format(ERROR.INVALID_TYPE, [typeof connectOptions.willMessage.destinationName, "connectOptions.willMessage.destinationName"]));
+			}
+			if (typeof connectOptions.cleanSession === "undefined")
+				connectOptions.cleanSession = true;
+			if (connectOptions.hosts) {
+			    
+				if (!(connectOptions.hosts instanceof Array) )
+					throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.hosts, "connectOptions.hosts"]));
+				if (connectOptions.hosts.length <1 )
+					throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.hosts, "connectOptions.hosts"]));
+				
+				var usingURIs = false;
+				for (var i = 0; i<connectOptions.hosts.length; i++) {
+					if (typeof connectOptions.hosts[i] !== "string")
+						throw new Error(format(ERROR.INVALID_TYPE, [typeof connectOptions.hosts[i], "connectOptions.hosts["+i+"]"]));
+					if (/^(wss?):\/\/((\[(.+)\])|([^\/]+?))(:(\d+))?(\/.*)$/.test(connectOptions.hosts[i])) {
+						if (i == 0) {
+							usingURIs = true;
+						} else if (!usingURIs) {
+							throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.hosts[i], "connectOptions.hosts["+i+"]"]));
+						}
+					} else if (usingURIs) {
+						throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.hosts[i], "connectOptions.hosts["+i+"]"]));
+					}
+				}
+				
+				if (!usingURIs) {
+					if (!connectOptions.ports)
+						throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.ports, "connectOptions.ports"]));
+					if (!(connectOptions.ports instanceof Array) )
+						throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.ports, "connectOptions.ports"]));
+					if (connectOptions.hosts.length != connectOptions.ports.length)
+						throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.ports, "connectOptions.ports"]));
+					
+					connectOptions.uris = [];
+					
+					for (var i = 0; i<connectOptions.hosts.length; i++) {
+						if (typeof connectOptions.ports[i] !== "number" || connectOptions.ports[i] < 0)
+							throw new Error(format(ERROR.INVALID_TYPE, [typeof connectOptions.ports[i], "connectOptions.ports["+i+"]"]));
+						var host = connectOptions.hosts[i];
+						var port = connectOptions.ports[i];
+						
+						var ipv6 = (host.indexOf(":") != -1);
+						uri = "ws://"+(ipv6?"["+host+"]":host)+":"+port+path;
+						connectOptions.uris.push(uri);
+					}
+				} else {
+					connectOptions.uris = connectOptions.hosts;
+				}
+			}
+			
+			client.connect(connectOptions);
+		},
+      subscribe: function (filter, subscribeOptions) {
+			if (typeof filter !== "string")
+				throw new Error("Invalid argument:"+filter);
+			subscribeOptions = subscribeOptions || {} ;
+			validate(subscribeOptions,  {qos:"number", 
+										 invocationContext:"object", 
+										 onSuccess:"function", 
+										 onFailure:"function",
+										 timeout:"number"
+										});
+			if (subscribeOptions.timeout && !subscribeOptions.onFailure)
+				throw new Error("subscribeOptions.timeout specified with no onFailure callback.");
+			if (typeof subscribeOptions.qos !== "undefined" 
+				&& !(subscribeOptions.qos === 0 || subscribeOptions.qos === 1 || subscribeOptions.qos === 2 ))
+				throw new Error(format(ERROR.INVALID_ARGUMENT, [subscribeOptions.qos, "subscribeOptions.qos"]));
+			client.subscribe(filter, subscribeOptions);
+		},
+      unsubscribe: function (filter, unsubscribeOptions) {
+			if (typeof filter !== "string")
+				throw new Error("Invalid argument:"+filter);
+			unsubscribeOptions = unsubscribeOptions || {} ;
+			validate(unsubscribeOptions,  {invocationContext:"object", 
+										   onSuccess:"function", 
+										   onFailure:"function",
+										   timeout:"number"
+										  });
+			if (unsubscribeOptions.timeout && !unsubscribeOptions.onFailure)
+				throw new Error("unsubscribeOptions.timeout specified with no onFailure callback.");
+			client.unsubscribe(filter, unsubscribeOptions);
+		},
+      send: function (topic,payload,qos,retained) {   
+			var message ;  
+			
+			if(arguments.length == 0){
+				throw new Error("Invalid argument."+"length");
+
+			}else if(arguments.length == 1) {
+
+				if (!(topic instanceof Message) && (typeof topic !== "string"))
+					throw new Error("Invalid argument:"+ typeof topic);
+
+				message = topic;
+				if (typeof message.destinationName === "undefined")
+					throw new Error(format(ERROR.INVALID_ARGUMENT,[message.destinationName,"Message.destinationName"]));
+				client.send(message); 
+
+			}else {
+				//parameter checking in Message object 
+				message = new Message(payload);
+				message.destinationName = topic;
+				if(arguments.length >= 3)
+					message.qos = qos;
+				if(arguments.length >= 4)
+					message.retained = retained;
+				client.send(message); 
+			}
+		},
+      disconnect: function () {
+			client.disconnect();
+		},
+      getTraceLog: function () {
+			return client.getTraceLog();
+		},
+      startTrace: function () {
+			client.startTrace();
+		},
+      stopTrace: function () {
+			client.stopTrace();
+		},
+      isConnected: function () {
+			return client.connected;
+		},
       },
     connioMQTTMessageRecvCallback: function on_connio_property_updated(device_id,property, value) {
   try {
@@ -92,110 +994,931 @@ $( document ).ready(function() {
     );}
 
   } catch (e) { com.fc.JavaScriptDistLib.handleException(e); }},
-    configure: function (){if(null==this.connioBaseURL){var a=this,b=Creator.currentProject.serviceModel.getServiceObject("Connio"),c=b.attributes.attrs;this.connioBaseURL=c.api.url,this.connioApp=c.api.app,this.connioKEY=c.api.key,this.connioSecret=c.api.secret,this.connioMQTTHost=c.mqtt.host,this.connioMQTTPort=Number(c.mqtt.port),this.connioMQTTCientID=c.mqtt.clientId,this.connioMQTTUsername=c.mqtt.username,this.connioMQTTPassword=c.mqtt.password,this.connioMQTTTopic="connio/apps/"+this.connioApp+"/devices/#";try{""!=this.connioBaseURL&&""!=this.connioKEY&&""!=this.connioSecret||console.log("Please go to File -> Connio Properties and set credentials."),""!=this.connioMQTTHost&&""!=this.connioMQTTPort&&""!=this.connioMQTTCientID&&""!=this.connioMQTTUsername&&""!=this.connioMQTTPassword&&""!=this.connioApp?(this.connioMQTTClient=new Paho.MQTT.Client(this.connioMQTTHost,this.connioMQTTPort,this.connioMQTTCientID),this.connioMQTTClient.onConnectionLost=function(b){a.handleMQTTConnectionLost(b)},this.connioMQTTClient.onMessageArrived=function(b){a.handleMQTTMessage(b)}):console.log("Please go to File -> Connio Properties and set credentials.")}catch(a){console.log("Some of the properties are missing. Go to File->Connio Properties")}}},
-    connioConfigure: function (a,b,c){this.configure(),this.connioKEY=a,this.connioSecret=b,this.connioMQTTMessageRecvCallback=c,this.connio_mqtt_connect()},
-    connioStartTrackingPropertyChanges: function (a){this.configure(),this.connioMQTTMessageRecvCallback=a,this.connio_mqtt_connect()},
-    connioStopTrackingPropertyChanges: function (){this.configure(),this.connio_mqtt_disconnect()},
-    connioGetDeviceProfiles: function (a){this.configure();var b=this.connioBaseURL+"/v2/deviceprofiles";$.ajax({url:b,type:"GET",headers:{Authorization:"Basic "+btoa(this.connioKEY+":"+this.connioSecret)},success:function(b){a(b)},error:function(a,b,c){console.log("Could not get the profiles. Could be network error")}})},
-    connioGetDevices: function (a,b){this.configure();var c=this.connioBaseURL+"/v2/devices?profile="+a;$.ajax({url:c,type:"GET",headers:{Authorization:"Basic "+btoa(this.connioKEY+":"+this.connioSecret)},success:function(a){b(a)},error:function(a,b,c){console.log("Could not get the devices.")}})},
-    connioGetProperties: function (a,b){this.configure();var c=this.connioBaseURL+"/v2/deviceprofiles/"+a+"/properties";$.ajax({url:c,type:"GET",headers:{Authorization:"Basic "+btoa(this.connioKEY+":"+this.connioSecret)},success:function(a){b(a)},error:function(a,b,c){console.log("Could not get the properties.")}})},
-    connioReadData: function (a,b,c){this.configure();var d=this.connioBaseURL+"/v2/data/devices/"+a;$.ajax({url:d,type:"GET",headers:{Authorization:"Basic "+btoa(this.connioKEY+":"+this.connioSecret)},success:function(a){b(a)},error:function(a,b,d){c(d),console.log("Could not read data.")}})},
-    connionGetValue: function (a,b,c){this.configure();var d=a.properties;if(void 0!=d&&d.length>0)for(var e=0;e<d.length;e++){var f=d[e],g=f.descriptors.qname;if(g.indexOf(c)!=-1){var h=f.value[b];if(void 0!=h)return h}}return""},
-    connioGetDeviceName: function (a,b){this.configure();var c=a.results;try{for(var d=0;d<c.length;d++){var e=c[d];if(e.id==b)return e.name}}catch(a){}return""},
-    connioGetDeviceLocation: function (a,b){this.configure();var c=a.results;try{for(var d=0;d<c.length;d++){var e=c[d];if(e.id==b||e.name==b){var f={lat:e.location.geo.lat,lng:e.location.geo.lon};return f}}}catch(a){}return""},
-    connioWriteData: function (a,b,c,d,e){this.configure();var f=this.connioBaseURL+"/v2/data/devices/"+a+"/properties/"+c,g={};g.dps=[];var h={};h.t=(new Date).toISOString(),h.v=b,g.dps.push(h),$.ajax({url:f,type:"POST",headers:{Authorization:"Basic "+btoa(this.connioKEY+":"+this.connioSecret),"Content-Type":"application/json",Accept:"application/json"},dataType:"json",data:JSON.stringify(g),success:function(a){d(a)},error:function(a,b,c){e(c),console.log("Could not write data.")}})},
-    connioExecuteMethod: function (a,b,c,d,e){this.configure()},
-    connioReadHistorical: function (a,b,c,d,e,f,g,h){this.configure();var i=this.connioBaseURL+"/v2/data/devices/"+a+"/properties/"+b+"?";if(null!=e){var j=(e?"-":"")+"source.time";i+="sort="+j}else i+="sort=-source.time";null!=f&&(i+="&limit="+f),null!=c&&null!=d&&(i+="&q=source.time:("+c.toISOString()+"+TO+"+d.toISOString()+")"),$.ajax({url:i,type:"GET",headers:{Authorization:"Basic "+btoa(this.connioKEY+":"+this.connioSecret)},success:function(a){for(var b=com.fc.JavaScriptDistLib.JSON.parseJSONDataForPath(a,"$.results[:].t"),c=com.fc.JavaScriptDistLib.JSON.parseJSONDataForPath(a,"$.results[:].v"),d=[],e=0;e<b.length;e++)d.push(moment(b[e]).format("MMM-DD hh:mm A"));g(d,c)},error:function(a,b,c){h(c),console.log("Could not read historical.")}})},
-    connio_mqtt_connect: function (){console.log("Connecting to Connio MQTT...");var a=this;try{this.connioMQTTClient.connect({onSuccess:function(){console.log("Connected to Connio MQTT..."),a.subscribeToTopic()},userName:this.connioMQTTUsername,password:this.connioMQTTPassword,keepAliveInterval:25,timeout:60,useSSL:!0})}catch(a){console.log("Connio MQTT connection already exists. Coming out...")}},
-    connio_mqtt_disconnect: function (){console.log("Disconnecting Connio MQTT..."),this.connioMQTTClient.disconnect()},
-    subscribeToTopic: function (){console.log("Subscribing to topic...");var a=this,b={qos:0,invocationContext:{foo:!0},onSuccess:function(b){a.handleMQTTSubscribeSuccess(b)},onFailure:function(b){a.handleMQTTSubscribeFailed(b),console.log("Could not subscribe to topic")},timeout:10};this.connioMQTTClient.subscribe(this.connioMQTTTopic,b)},
-    handleMQTTConnectionLost: function (a){console.log("Connection Lost: "+a.errorMessage)},
-    handleMQTTSubscribeSuccess: function (a){console.log("Subscribe success")},
-    handleMQTTSubscribeFailed: function (a){console.log("Subscribe failed")},
-    handleMQTTMessage: function (a){if(null!=this.connioMQTTMessageRecvCallback){var b=a.destinationName.split("/");this.connioMQTTMessageRecvCallback(b[4],b[6],a.payloadString)}},
-    ConnioConfigException: function (a,b){this.name="ConnioConfigException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
-    ConnioNetworkException: function (a,b){this.name="ConnioNetworkException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
-    ConnioMQTTException: function (a,b){this.name="ConnioMQTTException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
+    configure: function () {
+		if( this.connioBaseURL == null ) {
+			var parent = this;
+			var connioSO = Creator.currentProject.serviceModel.getServiceObject('Connio');
+   			var properties = connioSO.attributes.attrs;
+			this.connioBaseURL = properties.api.url;
+			this.connioApp = properties.api.app;
+			this.connioKEY = properties.api.key;
+			this.connioSecret = properties.api.secret;
+			this.connioMQTTHost = properties.mqtt.host;
+			this.connioMQTTPort = Number(properties.mqtt.port);
+			//HS: ToDO: Remove username and password and client ID for MQTT. Should come from SO properties.
+			this.connioMQTTCientID = properties.mqtt.clientId;
+			this.connioMQTTUsername = properties.mqtt.username;
+			this.connioMQTTPassword = properties.mqtt.password;
+			this.connioMQTTTopic = "connio/apps/" + this.connioApp + "/devices/#";
+
+			try {
+				if( this.connioBaseURL == '' || this.connioKEY == '' || this.connioSecret == '' ) {
+					console.log("Please go to File -> Connio Properties and set credentials.");
+				}
+
+				if( this.connioMQTTHost != '' && this.connioMQTTPort!= '' && this.connioMQTTCientID!='' &&
+					this.connioMQTTUsername!='' && this.connioMQTTPassword != '' && this.connioApp!='' ) {
+					this.connioMQTTClient = new Paho.MQTT.Client(this.connioMQTTHost, this.connioMQTTPort, this.connioMQTTCientID);
+					// set callback handlers
+					this.connioMQTTClient.onConnectionLost = function(responseObject) {
+						parent.handleMQTTConnectionLost(responseObject);
+					};
+					this.connioMQTTClient.onMessageArrived = function(message) {
+						parent.handleMQTTMessage(message);
+					};
+				}
+				else {
+					console.log("Please go to File -> Connio Properties and set credentials.");
+				}
+			}
+			catch(e) {
+				console.log("Some of the properties are missing. Go to File->Connio Properties");
+			}
+			
+			
+		}
+	},
+    connioConfigure: function (key, secret, callback) {
+		this.configure();
+		this.connioKEY = key;
+		this.connioSecret = secret;
+		this.connioMQTTMessageRecvCallback = callback;
+		this.connio_mqtt_connect();
+	},
+    connioStartTrackingPropertyChanges: function (callback) {
+		this.configure();
+		this.connioMQTTMessageRecvCallback = callback;
+		this.connio_mqtt_connect();
+	},
+    connioStopTrackingPropertyChanges: function () {
+		this.configure();
+		this.connio_mqtt_disconnect();
+	},
+    connioGetDeviceProfiles: function (successcallback) {
+		var parent = this;
+		this.configure();
+		var url = this.connioBaseURL + "/v2/deviceprofiles";
+		$.ajax(
+			{
+	  			url: url,
+	  			type: 'GET',
+	        	headers: {
+	    				"Authorization": "Basic " + btoa(this.connioKEY + ":" + this.connioSecret)
+	    		},
+				success: function (response) {
+					successcallback(response);
+				},
+				error: function(xhr, code, msg) {
+					console.log("Could not get the profiles. Could be network error");
+				}
+	  	});
+	},
+    connioGetDevices: function (filter, successcallback) {
+		var parent = this;
+		this.configure();
+		var url = this.connioBaseURL + "/v2/devices?profile=" + filter;
+		$.ajax(
+			{
+	  			url: url,
+	  			type: 'GET',
+	        	headers: {
+	    				"Authorization": "Basic " + btoa(this.connioKEY + ":" + this.connioSecret)
+	    		},
+				success: function (response) {
+					successcallback(response);
+				},
+				error: function(xhr, code, msg) {
+	  				console.log("Could not get the devices.");
+				}
+	  	});
+	},
+    connioGetProperties: function (profile, successcallback) {
+		var parent = this;
+		this.configure();
+		var url = this.connioBaseURL + "/v2/deviceprofiles/" + profile + "/properties";
+		$.ajax(
+			{
+	  			url: url,
+	  			type: 'GET',
+	        	headers: {
+	    				"Authorization": "Basic " + btoa(this.connioKEY + ":" + this.connioSecret)
+	    		},
+				success: function (response) {
+					successcallback(response);
+				},
+				error: function(xhr, code, msg) {
+	  				console.log("Could not get the properties.");
+				}
+	  	});
+	},
+    connioReadData: function (device, successcallback, failurecallback) {
+		var parent = this;
+		this.configure();
+		var url = this.connioBaseURL + "/v2/data/devices/" + device;
+		$.ajax(
+			{
+	  			url: url,
+	  			type: 'GET',
+	        	headers: {
+	    				"Authorization": "Basic " + btoa(this.connioKEY + ":" + this.connioSecret)
+	    		},
+				success: function (response) {
+					successcallback(response);
+				},
+				error: function(xhr, code, msg) {
+	  				failurecallback(msg);
+	  				console.log("Could not read data.");
+				}
+	  	});
+	},
+    connionGetValue: function (data, valueType, propertyName) {
+		this.configure();
+		var properties = data.properties;
+		if( (properties!=undefined) && (properties.length>0) ) {
+			for(var i=0; i<properties.length; i++) {
+				var property = properties[i];
+				var qname = property.descriptors.qname;
+
+				if( qname.indexOf(propertyName) != -1)  {
+					var value = property.value[valueType];
+					if( value!=undefined ) {
+						return value;
+					}
+				}
+			}
+		}
+		return "";
+	},
+    connioGetDeviceName: function (data, id) {
+		this.configure();
+		var devices = data.results;
+		try {
+			for(var i=0; i<devices.length; i++) {
+				var device = devices[i];
+				if( device.id == id ) {
+					return device.name;
+				}
+			}
+		}
+		catch(e) {
+
+		}
+		
+		return "";
+	},
+    connioGetDeviceLocation: function (data, id) {
+		this.configure();
+		var devices = data.results;
+		try {
+			for(var i=0; i<devices.length; i++) {
+				var device = devices[i];
+				if( (device.id == id) || (device.name == id) ) {
+	      			var locationObj = {lat: device.location.geo.lat, lng: device.location.geo.lon};
+					return locationObj;
+				}
+			}
+		}
+		catch(e) {
+		}
+		
+		return "";
+	},
+    connioWriteData: function (device, value, property, successcallback, failurecallback) {
+		var parent = this;
+		this.configure();
+		var url = this.connioBaseURL + "/v2/data/devices/" + device + "/properties/" + property;
+		var data = {};
+		data.dps = [];
+		var val = {};
+		val.t = new Date().toISOString();
+		val.v = value;
+		data.dps.push(val);
+		
+		$.ajax(
+			{
+	  			url: url,
+	  			type: 'POST',
+	        	headers: {
+	    				"Authorization": "Basic " + btoa(this.connioKEY + ":" + this.connioSecret),
+	    				"Content-Type": "application/json",
+	    				"Accept": "application/json"
+	    		},
+	    		dataType: "json",
+	    		data: JSON.stringify(data),
+				success: function (response) {
+					successcallback(response);
+				},
+				error: function(xhr, code, msg) {
+	  				failurecallback(msg);
+	  				console.log("Could not write data.");
+				}
+	  	});
+	},
+    connioExecuteMethod: function (device, method, data, successcallback, failurecallback) {
+		this.configure();
+	},
+    connioReadHistorical: function (device, property, timeStart, timeEnd, descending, limit, successcallback, failurecallback) {
+		var parent = this;
+		this.configure();
+		var url = this.connioBaseURL + "/v2/data/devices/" + device + "/properties/" + property + "?";
+
+		if( descending!=null ) {
+			var sorting = (descending ? "-" : "") + "source.time";
+			url += "sort=" + sorting;
+		}
+		else {
+			url += "sort=-source.time";
+		}
+
+		if( limit!=null ) {
+			url += "&limit=" + limit;
+		}
+		
+		if (timeStart != null && timeEnd != null) {
+			url += "&q=source.time:(" + timeStart.toISOString() + "+TO+" + timeEnd.toISOString() + ")";
+		}
+		
+		$.ajax(
+			{
+	  			url: url,
+	  			type: 'GET',
+	        	headers: {
+	    				"Authorization": "Basic " + btoa(this.connioKEY + ":" + this.connioSecret)
+	    		},
+				success: function (response) {
+					var timeList = com.fc.JavaScriptDistLib.JSON.parseJSONDataForPath(response, "$.results[:].t");
+					var valueList = com.fc.JavaScriptDistLib.JSON.parseJSONDataForPath(response, "$.results[:].v");
+					var formattedTimeList = [];
+					for (var i=0;i<timeList.length;i++) {
+						formattedTimeList.push(moment(timeList[i]).format('MMM-DD hh:mm A'));
+					}
+					successcallback(formattedTimeList, valueList);
+				},
+				error: function(xhr, code, msg) {
+	  				failurecallback(msg);
+	  				console.log("Could not read historical.");
+				}
+	  	});
+	},
+    connio_mqtt_connect: function () {
+		console.log("Connecting to Connio MQTT...");
+		var parent = this;
+		try {
+			 this.connioMQTTClient.connect( {
+			 	onSuccess: function() {
+					console.log("Connected to Connio MQTT...");
+			 		parent.subscribeToTopic();
+			 	},
+			 	userName : this.connioMQTTUsername,
+			 	password : this.connioMQTTPassword,
+			 	keepAliveInterval: 25,
+			 	timeout: 60,
+			 	useSSL: true
+			});
+		}
+		catch(e) {
+			console.log("Connio MQTT connection already exists. Coming out...")
+		}
+	},
+    connio_mqtt_disconnect: function () {
+		console.log("Disconnecting Connio MQTT...");
+		this.connioMQTTClient.disconnect();
+	},
+    subscribeToTopic: function () {
+		console.log("Subscribing to topic...");
+		var parent = this;
+		var subscribeOptions = {
+		  	qos: 0,  // QoS
+			invocationContext: {foo: true},
+			onSuccess: function(context) {
+				parent.handleMQTTSubscribeSuccess(context);
+			},
+			onFailure: function(context) {
+				parent.handleMQTTSubscribeFailed(context);
+				console.log("Could not subscribe to topic");
+			},
+			timeout: 10
+		};
+
+		this.connioMQTTClient.subscribe(this.connioMQTTTopic, subscribeOptions);
+	},
+    handleMQTTConnectionLost: function (responseObject) {
+		console.log("Connection Lost: " + responseObject.errorMessage);
+	},
+    handleMQTTSubscribeSuccess: function (context) {
+		console.log("Subscribe success");
+	},
+    handleMQTTSubscribeFailed: function (context) {
+		console.log("Subscribe failed");
+	},
+    handleMQTTMessage: function (message) {
+		//console.log("Connio MQTT Message Arrived: " + message.destinationName + " " + message.payloadString);
+		if( this.connioMQTTMessageRecvCallback!=null ) {
+			var messageArray = message.destinationName.split("/");
+			this.connioMQTTMessageRecvCallback(messageArray[4], messageArray[6], message.payloadString);
+		}
+	},
+    ConnioConfigException: function (snappMessage, msg) {
+	    this.name = "ConnioConfigException";
+	    this.snappMessage = snappMessage;
+	    //custom message from smapp.
+	    this.message = msg || snappMessage;
+	    this.stack = (new Error()).stack;
+	},
+    ConnioNetworkException: function (snappMessage, msg) {
+	    this.name = "ConnioNetworkException";
+	    this.snappMessage = snappMessage;
+	    //custom message from smapp.
+	    this.message = msg || snappMessage;
+	    this.stack = (new Error()).stack;
+	},
+    ConnioMQTTException: function (snappMessage, msg) {
+	    this.name = "ConnioMQTTException";
+	    this.snappMessage = snappMessage;
+	    //custom message from smapp.
+	    this.message = msg || snappMessage;
+	    this.stack = (new Error()).stack;
+	},
     },
   TimeLibrary: {
-    createTime: function (a){var b=a.match(/^(\d{2}):(\d{2})(\s)(\w{2})(\s)(\d{2})\/(\d{2})\/(\d{4})$/);if(null===b)return null;var c=+b[6],d=+b[7],e=+b[8],f=b[4],g=+b[1],h=+b[2];if(0==f.toString().toLowerCase().localeCompare("pm"))g+=12;else if(0!=f.toString().toLowerCase().localeCompare("am"))return f;return new Date(e,d-1,c,g,h)},
-    createTimeNow: function (){return new Date},
-    createTimeFromTimestamp: function (a){return new Date(Number(a))},
-    createTimestampFromTime: function (a){return new Date(a).getTime()},
-    textFromTime: function (a,b){var c=new Date(a);switch(b){case"DATE_TIME_12":var d=c.getHours(),e=c.getMinutes(),f=c.getMonth()+1,g=c.getDate(),h=c.getFullYear(),i="AM";return d>12&&(d-=12,i="PM"),1==e.toString().length&&(e="0"+e),d+":"+e+" "+i+" "+g+"/"+f+"/"+h;case"DATE_TIME_12_US":var d=c.getHours(),e=c.getMinutes(),f=c.getMonth()+1,g=c.getDate(),h=c.getFullYear(),i="AM";return d>12&&(d-=12,i="PM"),1==e.toString().length&&(e="0"+e),d+":"+e+" "+i+" "+f+"/"+g+"/"+h;case"DATE_TIME_24":var d=c.getHours(),e=c.getMinutes(),f=c.getMonth()+1,g=c.getDate(),h=c.getFullYear();return 1==e.toString().length&&(e="0"+e),d+":"+e+" "+g+"/"+f+"/"+h;case"DATE_TIME_24_US":var d=c.getHours(),e=c.getMinutes(),f=c.getMonth()+1,g=c.getDate(),h=c.getFullYear();return 1==e.toString().length&&(e="0"+e),d+":"+e+" "+f+"/"+g+"/"+h;case"TIME_12":var d=c.getHours(),e=c.getMinutes(),i="AM";return d>12&&(d-=12,i="PM"),d+":"+e+" "+i;case"TIME_24":var d=c.getHours(),e=c.getMinutes();return d+":"+e;case"DATE":var f=c.getMonth()+1,g=c.getDate(),h=c.getFullYear();return g+"/"+f+"/"+h;case"DATE_US":var f=c.getMonth()+1,g=c.getDate(),h=c.getFullYear();return f+"/"+g+"/"+h;default:return""}},
-    elapsedComponent: function (a,b){return Math.floor(a/b)},
-    elapsedComponentsFromTime: function (a,b){var c=new Date(a.getTime()),d=new Date(0),e=c.getUTCFullYear()-d.getUTCFullYear(),f=c.getUTCMonth()-d.getUTCMonth(),g=c.getUTCDate()-d.getUTCDate(),h=c.getUTCHours()-d.getUTCHours(),i=c.getUTCMinutes()-d.getUTCMinutes(),j=c.getUTCSeconds()-d.getUTCSeconds();switch(b){case"S":return[j];case"SM":return[i,j];case"SMH":return[h,i,j];case"SMHD":return[g,h,i,j];case"SMHDM":return[f,g,h,i,j];case"SMHDMY":return[e,f,g,h,i,j];default:return[]}},
-    componentsFromTime: function (a,b){var c=new Date(a);switch(b){case"S":return[c.getSeconds()];case"SM":return[c.getMinutes(),c.getSeconds()];case"SMH":return[c.getHours(),c.getMinutes(),c.getSeconds()];case"SMHD":return[c.getDate(),c.getHours(),c.getMinutes(),c.getSeconds()];case"SMHDM":return[c.getMonth()+1,c.getDate(),c.getHours(),c.getMinutes(),c.getSeconds()];case"SMHDMY":return[c.getFullYear(),c.getMonth()+1,c.getDate(),c.getHours(),c.getMinutes(),c.getSeconds()];default:return[]}},
-    numberDayOfWeekFromDate: function (a){var b=new Date(a);return 0==b.getDay()?7:b.getDay()},
-    stringDayOfWeekFromDate: function (a){var b=new Date(a),c=new Array("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday");return c[b.getDay()]},
-    createTimeInterval: function (a,b,c,d,e,f){return[a,b,c,d,e,f]},
-    addIntervalFromTime: function (a,b){if(b.constructor!==Array||6!=b.length)return new Date(a);var c=this.componentsFromTime(a,"SMHDMY"),d=c[0]+Number(b[5]),e=c[1]-1+Number(b[4]),f=c[2]+Number(b[3]),g=c[3]+Number(b[2]),h=c[4]+Number(b[1]),i=c[5]+Number(b[0]);return new Date(d,e,f,g,h,i)},
-    subtractIntervalFromTime: function (a,b){if(b.constructor!==Array||6!=b.length)return a;var c=this.componentsFromTime(a,"SMHDMY"),d=c[0]-Number(b[5]),e=c[1]-1-Number(b[4]),f=c[2]-Number(b[3]),g=c[3]-Number(b[2]),h=c[4]-Number(b[1]),i=c[5]-Number(b[0]);return new Date(d,e,f,g,h,i)},
-    TimeLibException: function (a,b){this.name="TimeLibException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
+    createTime: function (time) {
+        var t = time.match(/^(\d{2}):(\d{2})(\s)(\w{2})(\s)(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (t ===null)
+            return null;
+        var d=+t[6], m=+t[7], y=+t[8], sub=t[4], h=+t[1], min=+t[2];
+        if (sub.toString().toLowerCase().localeCompare("pm") == 0)
+            h=h+12;
+        else if(sub.toString().toLowerCase().localeCompare("am") != 0)
+            return sub;
+        return new Date(y,m-1,d,h,min);
+    },
+    createTimeNow: function () {
+        return new Date();
+    },
+    createTimeFromTimestamp: function (timestamp) {
+        return new Date(Number(timestamp));
+    },
+    createTimestampFromTime: function (time) {
+    return new Date(time).getTime();
+    },
+    textFromTime: function (time, op) {
+      var dateTime =  new Date(time);
+
+      switch(op){
+        case "DATE_TIME_12":
+            var H = dateTime.getHours();
+            var M = dateTime.getMinutes();
+            var m = dateTime.getMonth()+1;
+            var d = dateTime.getDate();
+            var y = dateTime.getFullYear();
+            var a = "AM";
+            if (H>12){
+                H = H-12;
+                a = "PM"
+            }
+            if (M.toString().length == 1) {
+                M = "0" + M;
+            }
+            return H + ":" + M + " " + a + " " + d + "/" + m + "/" + y;
+
+        case "DATE_TIME_12_US":
+            var H = dateTime.getHours();
+            var M = dateTime.getMinutes();
+            var m = dateTime.getMonth()+1;
+            var d = dateTime.getDate();
+            var y = dateTime.getFullYear();
+            var a = "AM";
+            if (H>12){
+                H = H-12;
+                a = "PM"
+            }
+            if (M.toString().length == 1) {
+                M = "0" + M;
+            }
+            return H + ":" + M + " " + a + " " + m + "/" + d + "/" + y;
+
+        case "DATE_TIME_24":
+            var H = dateTime.getHours();
+            var M = dateTime.getMinutes();
+            var m = dateTime.getMonth()+1;
+            var d = dateTime.getDate();
+            var y = dateTime.getFullYear();
+            if (M.toString().length == 1) {
+                M = "0" + M;
+            }
+            return H + ":" + M + " " + d + "/" + m + "/" + y;
+
+        case "DATE_TIME_24_US":
+            var H = dateTime.getHours();
+            var M = dateTime.getMinutes();
+            var m = dateTime.getMonth()+1;
+            var d = dateTime.getDate();
+            var y = dateTime.getFullYear();
+            if (M.toString().length == 1) {
+                M = "0" + M;
+            }
+            return H + ":" + M + " " + m + "/" + d + "/" + y;
+
+        case "TIME_12":
+            var H = dateTime.getHours();
+            var M = dateTime.getMinutes();
+            var a = "AM";
+            if (H>12){
+                H = H-12;
+                a = "PM"
+            }
+            return H + ":" + M + " " + a;
+
+        case "TIME_24":
+            var H = dateTime.getHours();
+            var M = dateTime.getMinutes();
+            return H + ":" + M;
+
+        case "DATE":
+            var m = dateTime.getMonth()+1;
+            var d = dateTime.getDate();
+            var y = dateTime.getFullYear();
+            return d + "/" + m + "/" + y;
+
+        case "DATE_US":
+            var m = dateTime.getMonth()+1;
+            var d = dateTime.getDate();
+            var y = dateTime.getFullYear();
+            return m + "/" + d + "/" + y;
+
+        default:
+            return "";
+      }
+    },
+    elapsedComponent: function (timestamp, num){
+        return Math.floor(timestamp/num);
+    },
+    elapsedComponentsFromTime: function (time, components) {
+        var dateTime =  new Date(time.getTime());
+        var dateZeroTime = new Date(0);
+        var y = dateTime.getUTCFullYear() - dateZeroTime.getUTCFullYear();
+        var m =  dateTime.getUTCMonth() - dateZeroTime.getUTCMonth();
+        var d =  dateTime.getUTCDate() - dateZeroTime.getUTCDate();
+        var h =  dateTime.getUTCHours() - dateZeroTime.getUTCHours();
+        var M =  dateTime.getUTCMinutes() - dateZeroTime.getUTCMinutes();
+        var s =  dateTime.getUTCSeconds() - dateZeroTime.getUTCSeconds();
+
+        switch(components) {
+            case "S":
+                return [s];
+            case "SM":
+                return [M,s];
+            case "SMH":
+                return [h,M,s];
+            case "SMHD":
+                return [d,h,M,s];
+            case "SMHDM":
+                return [m,d,h,M,s];
+            case "SMHDMY":
+                return [y,m,d,h,M,s];
+            default:
+                return [];
+        }
+    },
+    componentsFromTime: function (time, components) {
+        var dateTime =  new Date(time);
+        switch(components) {
+            case "S":
+                return [dateTime.getSeconds()];
+            case "SM":
+                return [dateTime.getMinutes(), dateTime.getSeconds()];
+            case "SMH":
+                return [dateTime.getHours(), dateTime.getMinutes(), dateTime.getSeconds()];
+            case "SMHD":
+                return [dateTime.getDate(), dateTime.getHours(), dateTime.getMinutes(), dateTime.getSeconds()];
+            case "SMHDM":
+                return [dateTime.getMonth()+1, dateTime.getDate(), dateTime.getHours(), dateTime.getMinutes(), dateTime.getSeconds()];
+            case "SMHDMY":
+                return [dateTime.getFullYear(), dateTime.getMonth()+1, dateTime.getDate(), dateTime.getHours(), dateTime.getMinutes(), dateTime.getSeconds()];
+            default:
+                return [];
+        }
+    },
+    numberDayOfWeekFromDate: function (time){
+        var dateTime =  new Date(time);
+        if (dateTime.getDay() == 0)
+            return 7;
+        return dateTime.getDay();
+
+    },
+    stringDayOfWeekFromDate: function (time) {
+        var dateTime =  new Date(time);
+        var ar = new Array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
+        return ar[dateTime.getDay()];
+    },
+    createTimeInterval: function ( sec, min, hou, day, mon, yea){
+        return [sec,min,hou,day,mon,yea];
+    },
+    addIntervalFromTime: function (time, timeInt) {
+        if (timeInt.constructor !== Array || timeInt.length != 6){
+            return new Date(time);
+        }
+        var elap = this.componentsFromTime(time, "SMHDMY");
+        var year = elap[0] + Number(timeInt[5]);
+        var month = (elap[1] - 1) + Number(timeInt[4]);
+        var day = elap[2] + Number(timeInt[3]);
+        var hours = elap[3] + Number(timeInt[2]);
+        var min =elap[4] + Number(timeInt[1]);
+        var sec = elap[5] + Number(timeInt[0]);
+        return new Date(year, month, day, hours, min, sec);
+        //var retTime = new Date(time);
+        //retTime.setSeconds(retTime.getSeconds() + Number(timeInt[0]));
+        //retTime.setMinutes(retTime.getMinutes() + Number(timeInt[1]));
+        //retTime.setHours(retTime.getHours() + Number(timeInt[2]));
+        //retTime.setDate(retTime.getDate() + Number(timeInt[3]));
+        //retTime.setMonth(retTime.getMonth() + Number(timeInt[4]));
+        //retTime.setFullYear(retTime.getFullYear() + Number(timeInt[5]));
+        //return retTime;
+    },
+    subtractIntervalFromTime: function (time, timeInt) {
+        if (timeInt.constructor !== Array || timeInt.length != 6){
+            return time;
+        }
+        var elap = this.componentsFromTime(time, "SMHDMY");
+        var year = elap[0] - Number(timeInt[5]);
+        var month = (elap[1] - 1) - Number(timeInt[4]);
+        var day = elap[2] - Number(timeInt[3]);
+        var hours = elap[3] - Number(timeInt[2]);
+        var min =elap[4] - Number(timeInt[1]);
+        var sec = elap[5] - Number(timeInt[0]);
+        return new Date(year, month, day, hours, min, sec);
+        //var retTime = new Date(time);
+        //retTime.setSeconds(retTime.getSeconds() - Number(timeInt[0]));
+        //retTime.setMinutes(retTime.getMinutes() - Number(timeInt[1]));
+        //retTime.setHours(retTime.getHours() - Number(timeInt[2]));
+        //retTime.setDate(retTime.getDate() - Number(timeInt[3]));
+        //retTime.setMonth(retTime.getMonth() - Number(timeInt[4]));
+        //retTime.setFullYear(retTime.getFullYear() - Number(timeInt[5]));
+        //return retTime;
+    },
+    TimeLibException: function (snappMessage, msg) {
+        this.name = "TimeLibException";
+        this.snappMessage = snappMessage;
+        //custom message from snapp.
+        this.message = msg || snappMessage;
+        this.stack = (new Error()).stack;
+    },
     },
   MathLibrary: {
-    toNumber: function (a){return this.isNumber(a)?Number(a):null},
-    isNumber: function (a){return!isNaN(a-0)&&null!==a&&""!==a&&a!==!1&&a!==!0},
-    mathCompare: function (a,b,c){switch(b){case"EQ":return this.toNumber(a)==this.toNumber(c);case"NEQ":return this.toNumber(a)!=this.toNumber(c);case"LT":return this.toNumber(a)<this.toNumber(c);case"LTE":return this.toNumber(a)<=this.toNumber(c);case"GT":return this.toNumber(a)>this.toNumber(c);case"GTE":return this.toNumber(a)>=this.toNumber(c);default:return!1}},
-    mathMinMax: function (a,b,c){switch(b){case"MIN":return Math.min(this.toNumber(a),this.toNumber(c));case"MAX":return Math.max(this.toNumber(a),this.toNumber(c));default:return 0}},
-    mathModulo: function (a,b,c){switch(b){case"MODULO":return this.toNumber(a)%this.toNumber(c);case"QUOTIENT":return Math.floor(this.toNumber(a)/this.toNumber(c));default:return 0}},
-    mathConversionRadDeg: function (a,b){switch(a){case"DEGTORAD":return this.toNumber(b)*(Math.PI/180);case"RADTODEG":return this.toNumber(b)*(180/Math.PI);default:return 0}},
-    mathRoundPrecision: function (a,b){return Math.round(this.toNumber(a)*Math.pow(10,this.toNumber(b)))/Math.pow(10,this.toNumber(b))},
-    MathLibException: function (a,b){this.name="MathLibException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
+    toNumber: function (num) {
+        if (this.isNumber(num)) {
+            return Number(num);
+        }
+        return null;
+    },
+    isNumber: function (o) {
+        return ! isNaN(o-0) && o !== null && o !== "" && o !== false && o !== true;
+    },
+    mathCompare: function (num1, comp, num2) {
+        switch (comp) {
+            case "EQ":
+                return this.toNumber(num1) == this.toNumber(num2);
+            case "NEQ":
+                return this.toNumber(num1) != this.toNumber(num2);
+            case "LT":
+                return this.toNumber(num1) < this.toNumber(num2);
+            case "LTE":
+                return this.toNumber(num1) <= this.toNumber(num2);
+            case "GT":
+                return this.toNumber(num1) > this.toNumber(num2);
+            case "GTE":
+                return this.toNumber(num1) >= this.toNumber(num2);
+            default:
+                return false;
+        }
+    },
+    mathMinMax: function (num1, comp, num2) {
+        switch (comp) {
+            case "MIN":
+                return Math.min(this.toNumber(num1), this.toNumber(num2));
+            case "MAX":
+                return Math.max(this.toNumber(num1), this.toNumber(num2));
+            default:
+                return 0;
+        }
+    },
+    mathModulo: function (num1, comp, num2) {
+        switch (comp) {
+            case "MODULO":
+                return this.toNumber(num1)%this.toNumber(num2);
+            case "QUOTIENT":
+                return Math.floor(this.toNumber(num1)/this.toNumber(num2));
+            default:
+                return 0;
+        }
+    },
+    mathConversionRadDeg: function (comp, num) {
+        switch (comp) {
+            case "DEGTORAD":
+                return this.toNumber(num) * (Math.PI/180);
+            case "RADTODEG":
+                return this.toNumber(num) * (180/Math.PI);
+            default:
+                return 0;
+        }
+    },
+    mathRoundPrecision: function (num,percision) {
+        return Math.round(this.toNumber(num) * Math.pow(10, this.toNumber(percision))) / Math.pow(10, this.toNumber(percision))
+    },
+    MathLibException: function (snappMessage, msg) {
+        this.name = "MathLibException";
+        this.snappMessage = snappMessage;
+        //custom message from snapp.
+        this.message = msg || snappMessage;
+        this.stack = (new Error()).stack;
+    },
     },
   TextLib: {
-    textComparison: function (a,b,c){switch(b){case"LESS":return a.toString()<c.toString();case"EQUAL":return a.toString()==c.toString();case"GREATER":return a.toString()>c.toString();default:return!1}},
-    textTrim: function (a){return a.toString().trim()},
-    textChangeCase: function (a,b){switch(b){case"UPPERCASE":return a.toString().toUpperCase();case"LOWERCASE":return a.toString().toLowerCase();default:return""}},
-    textSubstring: function (a,b,c){return a.toString().substring(toNumber(b),toNumber(b)+toNumber(c))},
-    textContains: function (a,b){return a.toString().indexOf(b)!==-1},
-    textIndexOf: function (a,b){return a.toString().indexOf(b)},
-    textSplitAt: function (a,b){return[a.toString().substring(0,toNumber(b)),a.toString().substring(toNumber(b))]},
-    textSplitWith: function (a,b){return a.toString().split(b.toString())},
-    textReplace: function (a,b,c){for(var d=c.toString();d.indexOf(a.toString())!==-1;)d=d.toString().replace(a.toString(),b.toString());return d},
-    isText: function (a){return"string"==typeof a||a instanceof String},
-    convertToText: function (a){return jQuery.isXMLDoc(a)?(new XMLSerializer).serializeToString(a):jQuery.isArray(a)?a.toString():"string"==typeof a?a:JSON.stringify(a)},
+    textComparison: function (text1, comp, text2) {
+        switch (comp) {
+            case "LESS":
+                return text1.toString() < text2.toString();
+            case "EQUAL":
+                return text1.toString() == text2.toString();
+            case "GREATER":
+                return text1.toString() > text2.toString();
+            default:
+                return false;
+        }
+    },
+    textTrim: function (text) {
+        return text.toString().trim();
+    },
+    textChangeCase: function (text, comp) {
+        switch (comp) {
+            case "UPPERCASE":
+                return text.toString().toUpperCase();
+            case "LOWERCASE":
+                return text.toString().toLowerCase();
+            default:
+                return "";
+        }
+    },
+    textSubstring: function (text, from, length) {
+        return text.toString().substring(toNumber(from),toNumber(from) + toNumber(length));
+    },
+    textContains: function (string, substring) {
+        return ((string.toString().indexOf(substring)) !== -1);
+    },
+    textIndexOf: function (string, substring) {
+        return string.toString().indexOf(substring);
+    },
+    textSplitAt: function (text, index) {
+        return [text.toString().substring(0, toNumber(index)), text.toString().substring(toNumber(index))];
+    },
+    textSplitWith: function (string, separator) {
+        return string.toString().split(separator.toString());
+    },
+    textReplace: function (textFrom, textTo, textSource) {
+        var returnText = textSource.toString();
+        while (returnText.indexOf(textFrom.toString()) !== -1){
+            returnText = returnText.toString().replace(textFrom.toString(),textTo.toString());
+        }
+        return returnText;
+    },
+    isText: function (text) {
+        return (typeof text === 'string' || text instanceof String);
+    },
+    convertToText: function (data) {
+        if( jQuery.isXMLDoc( data ) ) {
+            return  (new XMLSerializer()).serializeToString(data);
+        }
+        else if( jQuery.isArray( data ) )  {
+            return data.toString();
+        }
+        else if( typeof data == 'string' ) {
+            return data;
+        }
+        else {
+            return JSON.stringify(data);
+        }
+    },
     },
   Dictionary: {
-    createEmptyDictionary: function (){return"{}"},
-    removeAllKeys: function (a){for(var b in a)delete a[b]},
-    getKeys: function (a){var b=[];for(var c in a)b.push(c);return b},
-    getDictValue: function (a,b){return a[b]},
-    setDictValue: function (a,b,c){return a[b]=c},
-    removeDictKey: function (a,b){return delete a[b]},
-    conatinedInDict: function (a,b){return void 0!=a[b]},
+    removeAllKeys: function (dictionary) {
+    for( var key in dictionary ) {
+      delete dictionary[key];
+    }
+  },
+    getKeys: function (dictionary) {
+    var keys = [];
+    for( var key in dictionary ) {
+      keys.push(key);
+    }
+    return keys;
+  },
     },
   ListLibrary: {
-    listAdd: function (a,b){return a.push(b)},
-    listContains: function (a,b){return a.indexOf(b)>-1},
-    listAppend: function (a,b){return a.concat(b)},
-    listCheck: function (a){return a instanceof Array},
-    listEmpty: function (a){return a.length=0},
-    listOrder: function (a,b){a.sort(function(a,c){return"ASCENDING"==b?a-c:c-a})},
-    ListLibException: function (a,b){this.name="ListLibException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
+    listAdd: function (list,item) {
+    return list.push(item);
+  },
+    listContains: function (list,item) {
+    return (list.indexOf(item) > -1) ? true : false;
+  },
+    listAppend: function (list1,list2) {
+    return list1.concat(list2);
+  },
+    listCheck: function (list) {
+    return (list instanceof Array) ? true: false;
+  },
+    listEmpty: function (list) {
+    return list.length = 0;
+  },
+    listOrder: function (list,order) {
+    list.sort(function(a, b){
+      if( order == "ASCENDING" ) {
+        return a-b;
+      }
+      else {
+        return b-a;
+      }
+    });
+  },
+    ListLibException: function (snappMessage, msg) {
+    this.name = "ListLibException";
+    this.snappMessage = snappMessage;
+    //custom message from snapp.
+    this.message = msg || snappMessage;
+    this.stack = (new Error()).stack;
+  },
     },
   Gauge: {
-    setProperty: function (a,b,c){try{var d,e='[obj-name="'+a+'"]';$(e);switch($(e).find(".c3").each(function(){d=$(this).data("c3-chart")}),b){case"width":case"height":case"x":case"y":com.fc.JavaScriptDistLib.setProperty(a,b,c);break;case"Alpha":d3.selectAll(e).style("opacity",c/100);break;case"Background color":$(e+" svg").css("background-color",c);break;case"Current Value":d.load({columns:[["data",c]]});break;case"Maximum Value":d.internal.config.gauge_max=c;var f=d.data(),g=f[0].values[0].value;d.load({columns:[["data",g]]});break;case"Minimum Value":d.internal.config.gauge_min=c;var f=d.data(),g=f[0].values[0].value;d.load({columns:[["data",g]]});break;case"track color":d3.selectAll(e+" path.c3-chart-arcs-background").style("fill",c);break;case"pointer color":d3.selectAll(e).select("path.c3-arc-data").style("fill",c);break;case"track width":d.internal.config.gauge_width=c;var f=d.data(),g=f[0].values[0].value;d.load({columns:[["data",g]]})}}catch(a){throw new com.fc.JavaScriptDistLib.Gauge.GaugeException(a)}},
-    getProperty: function (a,b){try{var c,d='[obj-name= "'+a+'"]';$(d);$(d).find(".c3").each(function(){c=$(this).data("c3-chart")});var e;switch(b){case"width":case"height":case"x":case"y":e=com.fc.JavaScriptDistLib.getProperty(a,b);break;case"Alpha":e=100*$(d).css("opacity");break;case"Background color":e=$(d).find("#fcGauge").css("background-color");break;case"Current Value":e=c.data()[0].values[0].value;break;case"Maximum Value":e=c.internal.config.gauge_max;break;case"Minimum Value":e=c.internal.config.gauge_min;break;case"track color":e=d3.selectAll(d+" path.c3-chart-arcs-background").style("fill");break;case"pointer color":e=d3.selectAll(d).select("path.c3-arc-data").style("fill");break;case"track width":e=c.internal.config.gauge_width}return e}catch(a){throw new com.fc.JavaScriptDistLib.Gauge.GaugeException(a)}},
-    GaugeException: function (a,b){this.name="GaugeException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
+    setProperty: function (objName, property, value) {
+    try {
+      var elemSelector = '[obj-name="' + objName + '"]';
+      var elem = $(elemSelector);
+      var gauge;
+      $(elemSelector).find('.c3').each(function() {
+        gauge = $(this).data('c3-chart'); 
+      });
+      switch (property) {
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+          com.fc.JavaScriptDistLib.setProperty(objName, property, value);
+        break;
+        case "Alpha":
+          d3.selectAll(elemSelector).style('opacity', value/100)
+        break;
+        case "Background color":
+          $(elemSelector + ' svg').css("background-color",value);  
+        break;
+        case "Current Value":
+          gauge.load({columns: [['data', value]]});
+          break;
+        case "Maximum Value":
+          gauge.internal.config.gauge_max = value;
+          var gaugeData = gauge.data();
+          var gaugeCurrVal = gaugeData[0].values[0].value;
+          gauge.load({columns: [['data', gaugeCurrVal]]});
+        break;
+        case "Minimum Value":
+          gauge.internal.config.gauge_min = value;
+          var gaugeData = gauge.data();
+          var gaugeCurrVal = gaugeData[0].values[0].value;
+          gauge.load({columns: [['data', gaugeCurrVal]]});  
+        break;
+        case "track color":
+          d3.selectAll(elemSelector + ' path.c3-chart-arcs-background').style('fill', value)
+        break;
+        case "pointer color":
+          d3.selectAll(elemSelector).select('path.c3-arc-data').style('fill', value);  
+        break;
+        case "track width":
+          gauge.internal.config.gauge_width = value;
+          var gaugeData = gauge.data();
+          var gaugeCurrVal = gaugeData[0].values[0].value;
+          gauge.load({columns: [['data', gaugeCurrVal]]});
+        break;
+      }
+    } catch (e) {
+      throw new com.fc.JavaScriptDistLib.Gauge.GaugeException(e);
+    }
+  },
+    getProperty: function ( objName, property) {
+    try {
+      var elemSelector = '[obj-name= "' + objName + '"]';
+      var elem = $(elemSelector);
+      var gauge;
+      $(elemSelector).find('.c3').each(function() {
+        gauge = $(this).data('c3-chart'); 
+      });
+      var value;
+      switch (property) {
+        case "width":
+        case "height":
+        case "x":
+        case "y":
+          value  = com.fc.JavaScriptDistLib.getProperty( objName, property);
+        break;
+        case "Alpha":
+          value  =  $(elemSelector).css('opacity') * 100;
+        break;
+        case "Background color":
+          value  = $(elemSelector).find('#fcGauge').css("background-color");
+        break;
+        case "Current Value":
+          value  = gauge.data()[0].values[0].value;
+        break;
+        case "Maximum Value":
+          value = gauge.internal.config.gauge_max;
+        break;
+        case "Minimum Value":
+          value = gauge.internal.config.gauge_min;
+        break;
+        case "track color":
+          value = d3.selectAll(elemSelector + ' path.c3-chart-arcs-background').style('fill');
+        break;
+        case "pointer color":
+          value = d3.selectAll(elemSelector).select('path.c3-arc-data').style('fill');
+          break;
+        case "track width":
+          value = gauge.internal.config.gauge_width;
+        break;
+      }
+      return value;
+    } catch (e) {
+      throw new com.fc.JavaScriptDistLib.Gauge.GaugeException(e);
+    }
+  },
+    GaugeException: function (snappMessage, msg) {
+    this.name = "GaugeException";
+    this.snappMessage = snappMessage;
+    //custom message from smapp.
+    this.message = msg || snappMessage;
+    this.stack = (new Error()).stack;
+  },
     },
   MapContainer: {
     maps: {
       },
-    setProperty: function (a,b,c){},
-    getProperty: function (a,b){},
-    mapViewSetZoom: function (a,b){return this.maps[a].setZoom(b)},
-    toggleMapUserInteraction: function (a,b){var c={draggable:!1,scrollwheel:!1,panControl:!1,zoom:this.maps[a].getZoom()};if(b)var c={draggable:!0,scrollwheel:!0,panControl:!0,zoom:this.maps[a].getZoom()};var d=this.maps[a].setOptions(c);return d},
-    setLocationForMarker: function (a,b){var c=new google.maps.LatLng(b.lat,b.lng);a.setPosition(c)},
-    createMarkerWithImage: function (a,b){var c=new google.maps.Marker({title:b,icon:a});return c},
-    addMarkerToMap: function (a,b){b.setMap(this.maps[a])},
-    setMarkerLabel: function (a,b){return b.setTitle(a)},
-    setMarkerImage: function (a,b){return b.setIcon(a)},
-    removeMarker: function (a){return a.setMap(null)},
-    mapViewSetLocation: function (a,b,c){var d=new google.maps.LatLng(b.lat,b.lng);this.maps[a].setCenter(d)},
-    MapException: function (a,b){this.name="MapException",this.snappMessage=a,this.message=b||a,this.stack=(new Error).stack},
+    setProperty: function (objName, property, value) {
+  },
+    getProperty: function (objName, property) {
+  },
+    mapViewSetZoom: function (mapName, zoom) {
+    return this.maps[mapName].setZoom(zoom);
+  },
+    toggleMapUserInteraction: function (mapName, interaction) {
+    var options = {
+      draggable: false,
+      scrollwheel: false,
+      panControl: false,
+      zoom: this.maps[mapName].getZoom(),
+    };
+    if (interaction) {
+      var options = {
+        draggable: true,
+        scrollwheel: true,
+        panControl: true,
+        zoom: this.maps[mapName].getZoom(),
+      };
+    }
+    var newOptions = this.maps[mapName].setOptions(options);
+    return newOptions;
+  },
+    setLocationForMarker: function (marker,location) {
+    var latlng = new google.maps.LatLng(location.lat, location.lng);
+    marker.setPosition(latlng);
+  },
+    createMarkerWithImage: function (image, label) {
+    var marker = new google.maps.Marker({ title: label, icon: image });
+    //this.markers.push(marker);
+    return marker;
+  },
+    addMarkerToMap: function (mapName, marker) {
+    marker.setMap(this.maps[mapName]);
+  },
+    setMarkerLabel: function (text, marker) {
+    return marker.setTitle(text);
+  },
+    setMarkerImage: function (image, marker) {
+    return marker.setIcon(image);
+  },
+    removeMarker: function (marker) {
+    return marker.setMap(null);
+  },
+    mapViewSetLocation: function (mapName, location, animation) {
+    var latlng = new google.maps.LatLng(location.lat, location.lng);
+    this.maps[mapName].setCenter(latlng);
+  },
+    MapException: function (snappMessage, msg) {
+    this.name = "MapException";
+    this.snappMessage = snappMessage;
+    //custom message from snapp.
+    this.message = msg || snappMessage;
+    this.stack = (new Error()).stack;
+  },
     },
-  handleException: function (a,b){console.error("Exception: ",a,b)},
+  handleException: function (e, message) {
+        console.error('Exception: ', e, message);
+    },
   }
 
 
