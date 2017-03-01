@@ -984,16 +984,7 @@ $( document ).ready(function() {
 			return client.connected;
 		},
       },
-    connioMQTTMessageRecvCallback: function on_connio_property_updated(device_id,property, value) {
-  try {
-      // Block#: 46
-  if (property == ('temperature')) {
-    // Block#: 50
-    com.fc.JavaScriptDistLib.Label.setProperty("temperature", "Text", String(value) + String(' C'));// Block#: 54
-    com.fc.JavaScriptDistLib.Gauge.setProperty("Gauge", "Current Value", com.fc.JavaScriptDistLib.MathLibrary.toNumber(value)
-    );}
-
-  } catch (e) { com.fc.JavaScriptDistLib.handleException(e); }},
+    connioMQTTMessageRecvCallback: null,
     configure: function () {
 		if( this.connioBaseURL == null ) {
 			var parent = this;
