@@ -773,221 +773,10 @@ $( document ).ready(function() {
     connioMQTTUsername: "_key_822826112904411459",
     connioMQTTPassword: "cddd9bed10324fcea3ccef36e37924fa",
     connioMQTTTopic: "connio/apps/_app_796713082971687907/devices/#",
-    connioMQTTClient: {
-      _getHost: function () { return host; },
-      _setHost: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
-      _getPort: function () { return port; },
-      _setPort: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
-      _getPath: function () { return path; },
-      _setPath: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
-      _getURI: function () { return uri; },
-      _setURI: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
-      _getClientId: function () { return client.clientId; },
-      _setClientId: function () { throw new Error(format(ERROR.UNSUPPORTED_OPERATION)); },
-      _getOnConnectionLost: function () { return client.onConnectionLost; },
-      _setOnConnectionLost: function (newOnConnectionLost) { 
-			if (typeof newOnConnectionLost === "function")
-				client.onConnectionLost = newOnConnectionLost;
-			else 
-				throw new Error(format(ERROR.INVALID_TYPE, [typeof newOnConnectionLost, "onConnectionLost"]));
-		},
-      _getOnMessageDelivered: function () { return client.onMessageDelivered; },
-      _setOnMessageDelivered: function (newOnMessageDelivered) { 
-			if (typeof newOnMessageDelivered === "function")
-				client.onMessageDelivered = newOnMessageDelivered;
-			else 
-				throw new Error(format(ERROR.INVALID_TYPE, [typeof newOnMessageDelivered, "onMessageDelivered"]));
-		},
-      _getOnMessageArrived: function () { return client.onMessageArrived; },
-      _setOnMessageArrived: function (newOnMessageArrived) { 
-			if (typeof newOnMessageArrived === "function")
-				client.onMessageArrived = newOnMessageArrived;
-			else 
-				throw new Error(format(ERROR.INVALID_TYPE, [typeof newOnMessageArrived, "onMessageArrived"]));
-		},
-      _getTrace: function () { return client.traceFunction; },
-      _setTrace: function (trace) {
-			if(typeof trace === "function"){
-				client.traceFunction = trace;
-			}else{
-				throw new Error(format(ERROR.INVALID_TYPE, [typeof trace, "onTrace"]));
-			}
-		},
-      connect: function (connectOptions) {
-			connectOptions = connectOptions || {} ;
-			validate(connectOptions,  {timeout:"number",
-									   userName:"string", 
-									   password:"string", 
-									   willMessage:"object", 
-									   keepAliveInterval:"number", 
-									   cleanSession:"boolean", 
-									   useSSL:"boolean",
-									   invocationContext:"object", 
-									   onSuccess:"function", 
-									   onFailure:"function",
-									   hosts:"object",
-									   ports:"object",
-									   mqttVersion:"number",
-									   mqttVersionExplicit:"boolean",
-									   uris: "object"});
-			
-			// If no keep alive interval is set, assume 60 seconds.
-			if (connectOptions.keepAliveInterval === undefined)
-				connectOptions.keepAliveInterval = 60;
-
-			if (connectOptions.mqttVersion > 4 || connectOptions.mqttVersion < 3) {
-				throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.mqttVersion, "connectOptions.mqttVersion"]));
-			}
-
-			if (connectOptions.mqttVersion === undefined) {
-				connectOptions.mqttVersionExplicit = false;
-				connectOptions.mqttVersion = 4;
-			} else {
-				connectOptions.mqttVersionExplicit = true;
-			}
-
-			//Check that if password is set, so is username
-			if (connectOptions.password !== undefined && connectOptions.userName === undefined)
-				throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.password, "connectOptions.password"]))
-
-			if (connectOptions.willMessage) {
-				if (!(connectOptions.willMessage instanceof Message))
-					throw new Error(format(ERROR.INVALID_TYPE, [connectOptions.willMessage, "connectOptions.willMessage"]));
-				// The will message must have a payload that can be represented as a string.
-				// Cause the willMessage to throw an exception if this is not the case.
-				connectOptions.willMessage.stringPayload;
-				
-				if (typeof connectOptions.willMessage.destinationName === "undefined")
-					throw new Error(format(ERROR.INVALID_TYPE, [typeof connectOptions.willMessage.destinationName, "connectOptions.willMessage.destinationName"]));
-			}
-			if (typeof connectOptions.cleanSession === "undefined")
-				connectOptions.cleanSession = true;
-			if (connectOptions.hosts) {
-			    
-				if (!(connectOptions.hosts instanceof Array) )
-					throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.hosts, "connectOptions.hosts"]));
-				if (connectOptions.hosts.length <1 )
-					throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.hosts, "connectOptions.hosts"]));
-				
-				var usingURIs = false;
-				for (var i = 0; i<connectOptions.hosts.length; i++) {
-					if (typeof connectOptions.hosts[i] !== "string")
-						throw new Error(format(ERROR.INVALID_TYPE, [typeof connectOptions.hosts[i], "connectOptions.hosts["+i+"]"]));
-					if (/^(wss?):\/\/((\[(.+)\])|([^\/]+?))(:(\d+))?(\/.*)$/.test(connectOptions.hosts[i])) {
-						if (i == 0) {
-							usingURIs = true;
-						} else if (!usingURIs) {
-							throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.hosts[i], "connectOptions.hosts["+i+"]"]));
-						}
-					} else if (usingURIs) {
-						throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.hosts[i], "connectOptions.hosts["+i+"]"]));
-					}
-				}
-				
-				if (!usingURIs) {
-					if (!connectOptions.ports)
-						throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.ports, "connectOptions.ports"]));
-					if (!(connectOptions.ports instanceof Array) )
-						throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.ports, "connectOptions.ports"]));
-					if (connectOptions.hosts.length != connectOptions.ports.length)
-						throw new Error(format(ERROR.INVALID_ARGUMENT, [connectOptions.ports, "connectOptions.ports"]));
-					
-					connectOptions.uris = [];
-					
-					for (var i = 0; i<connectOptions.hosts.length; i++) {
-						if (typeof connectOptions.ports[i] !== "number" || connectOptions.ports[i] < 0)
-							throw new Error(format(ERROR.INVALID_TYPE, [typeof connectOptions.ports[i], "connectOptions.ports["+i+"]"]));
-						var host = connectOptions.hosts[i];
-						var port = connectOptions.ports[i];
-						
-						var ipv6 = (host.indexOf(":") != -1);
-						uri = "ws://"+(ipv6?"["+host+"]":host)+":"+port+path;
-						connectOptions.uris.push(uri);
-					}
-				} else {
-					connectOptions.uris = connectOptions.hosts;
-				}
-			}
-			
-			client.connect(connectOptions);
-		},
-      subscribe: function (filter, subscribeOptions) {
-			if (typeof filter !== "string")
-				throw new Error("Invalid argument:"+filter);
-			subscribeOptions = subscribeOptions || {} ;
-			validate(subscribeOptions,  {qos:"number", 
-										 invocationContext:"object", 
-										 onSuccess:"function", 
-										 onFailure:"function",
-										 timeout:"number"
-										});
-			if (subscribeOptions.timeout && !subscribeOptions.onFailure)
-				throw new Error("subscribeOptions.timeout specified with no onFailure callback.");
-			if (typeof subscribeOptions.qos !== "undefined" 
-				&& !(subscribeOptions.qos === 0 || subscribeOptions.qos === 1 || subscribeOptions.qos === 2 ))
-				throw new Error(format(ERROR.INVALID_ARGUMENT, [subscribeOptions.qos, "subscribeOptions.qos"]));
-			client.subscribe(filter, subscribeOptions);
-		},
-      unsubscribe: function (filter, unsubscribeOptions) {
-			if (typeof filter !== "string")
-				throw new Error("Invalid argument:"+filter);
-			unsubscribeOptions = unsubscribeOptions || {} ;
-			validate(unsubscribeOptions,  {invocationContext:"object", 
-										   onSuccess:"function", 
-										   onFailure:"function",
-										   timeout:"number"
-										  });
-			if (unsubscribeOptions.timeout && !unsubscribeOptions.onFailure)
-				throw new Error("unsubscribeOptions.timeout specified with no onFailure callback.");
-			client.unsubscribe(filter, unsubscribeOptions);
-		},
-      send: function (topic,payload,qos,retained) {   
-			var message ;  
-			
-			if(arguments.length == 0){
-				throw new Error("Invalid argument."+"length");
-
-			}else if(arguments.length == 1) {
-
-				if (!(topic instanceof Message) && (typeof topic !== "string"))
-					throw new Error("Invalid argument:"+ typeof topic);
-
-				message = topic;
-				if (typeof message.destinationName === "undefined")
-					throw new Error(format(ERROR.INVALID_ARGUMENT,[message.destinationName,"Message.destinationName"]));
-				client.send(message); 
-
-			}else {
-				//parameter checking in Message object 
-				message = new Message(payload);
-				message.destinationName = topic;
-				if(arguments.length >= 3)
-					message.qos = qos;
-				if(arguments.length >= 4)
-					message.retained = retained;
-				client.send(message); 
-			}
-		},
-      disconnect: function () {
-			client.disconnect();
-		},
-      getTraceLog: function () {
-			return client.getTraceLog();
-		},
-      startTrace: function () {
-			client.startTrace();
-		},
-      stopTrace: function () {
-			client.stopTrace();
-		},
-      isConnected: function () {
-			return client.connected;
-		},
-      },
+    connioMQTTClient: null,
     connioMQTTMessageRecvCallback: null,
     configure: function () {
 		if( this.connioBaseURL == null ) {
-			var parent = this;
 			var connioSO = Creator.currentProject.serviceModel.getServiceObject('Connio');
    			var properties = connioSO.attributes.attrs;
 			this.connioBaseURL = properties.api.url;
@@ -996,12 +785,15 @@ $( document ).ready(function() {
 			this.connioSecret = properties.api.secret;
 			this.connioMQTTHost = properties.mqtt.host;
 			this.connioMQTTPort = Number(properties.mqtt.port);
-			//HS: ToDO: Remove username and password and client ID for MQTT. Should come from SO properties.
 			this.connioMQTTCientID = properties.mqtt.clientId;
 			this.connioMQTTUsername = properties.mqtt.username;
 			this.connioMQTTPassword = properties.mqtt.password;
 			this.connioMQTTTopic = "connio/apps/" + this.connioApp + "/devices/#";
-
+		}
+	},
+    configureMQTT: function () {
+		var parent = this;
+		if (this.connioMQTTClient == null ) {
 			try {
 				if( this.connioBaseURL == '' || this.connioKEY == '' || this.connioSecret == '' ) {
 					console.log("Please go to File -> Connio Properties and set credentials.");
@@ -1025,24 +817,22 @@ $( document ).ready(function() {
 			catch(e) {
 				console.log("Some of the properties are missing. Go to File->Connio Properties");
 			}
-			
-			
-		}
+		}	
+		
 	},
     connioConfigure: function (key, secret, callback) {
 		this.configure();
 		this.connioKEY = key;
 		this.connioSecret = secret;
 		this.connioMQTTMessageRecvCallback = callback;
-		this.connio_mqtt_connect();
 	},
     connioStartTrackingPropertyChanges: function (callback) {
 		this.configure();
+		this.configureMQTT();
 		this.connioMQTTMessageRecvCallback = callback;
 		this.connio_mqtt_connect();
 	},
     connioStopTrackingPropertyChanges: function () {
-		this.configure();
 		this.connio_mqtt_disconnect();
 	},
     connioGetDeviceProfiles: function (successcallback) {
